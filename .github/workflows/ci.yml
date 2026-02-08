@@ -50,7 +50,7 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Bump package.json version
+      - name: Compute next tag from git tags
         id: bump
         env:
           BUMP_TYPE: ${{ github.event.inputs.bump }}
@@ -62,30 +62,42 @@ jobs:
             echo "Invalid bump type: $BUMP_TYPE" >&2
             exit 1
           fi
-          # Use npm to update version in package.json without creating git tag
-          npm version $BUMP_TYPE --no-git-tag-version
-          # Optionally append -alpha if requested and not already present
-          if [ "$APPEND_ALPHA" = "true" ]; then
-            node -e "const fs=require('fs');const p=require('./package.json'); if(!p.version.endsWith('-alpha')) p.version=p.version.replace(/-alpha$/,'')+'-alpha'; fs.writeFileSync('package.json',JSON.stringify(p,null,2)+"\n");"
+          git fetch --tags
+          LATEST_TAG=$(git tag --list "v*" --sort=-v:refname | head -n1 || true)
+          if [ -z "$LATEST_TAG" ]; then
+            LATEST_TAG="v0.0.0"
           fi
-          NEW_VERSION=$(node -p "require('./package.json').version")
-          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "Latest tag: $LATEST_TAG"
+          VER=${LATEST_TAG#v}
+          # strip prerelease (e.g. -alpha)
+          BASE_VER=${VER%%-*}
+          IFS='.' read -r MAJ MIN PAT <<< "$BASE_VER"
+          MAJ=${MAJ:-0}
+          MIN=${MIN:-0}
+          PAT=${PAT:-0}
+          case "$BUMP_TYPE" in
+            major)
+              MAJ=$((MAJ+1)); MIN=0; PAT=0;;
+            minor)
+              MIN=$((MIN+1)); PAT=0;;
+            patch)
+              PAT=$((PAT+1));;
+          esac
+          NEW_BASE="$MAJ.$MIN.$PAT"
+          if [ "$APPEND_ALPHA" = "true" ]; then
+            NEW_VER="$NEW_BASE-alpha"
+          else
+            NEW_VER="$NEW_BASE"
+          fi
+          echo "version=$NEW_VER" >> $GITHUB_OUTPUT
 
-      - name: Show new version
-        run: echo "New version is ${{ steps.bump.outputs.version }}"
-
-      - name: Commit version bump
+      - name: Create and push tag
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package.json package-lock.json || true
-          git commit -m "chore(release): ${{ steps.bump.outputs.version }}" || echo "No changes to commit"
-          git push origin HEAD
-
-      - name: Create tag
-        run: |
           TAG=v${{ steps.bump.outputs.version }}
-          git tag "$TAG"
+          echo "Creating tag $TAG"
+          git tag -a "$TAG" -m "Release $TAG"
           git push origin "$TAG"
 
       - name: Create GitHub release
