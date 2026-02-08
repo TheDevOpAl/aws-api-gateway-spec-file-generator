@@ -36,7 +36,6 @@ jobs:
   bump-version:
     name: Bump version, tag and create release
     runs-on: ubuntu-latest
-    # if: ${{ github.event_name == 'workflow_dispatch' }}
     permissions:
       contents: write
     steps:
@@ -48,48 +47,73 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
 
       - name: Compute next tag from git tags
         id: bump
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { execSync } = require('child_process');
+            const fs = require('fs');
+            
+            // Get environment variables with defaults
+            const bumpType = process.env.BUMP_TYPE || 'patch';
+            const appendAlpha = process.env.APPEND_ALPHA || 'true';
+            
+            console.log('Bump type:', bumpType);
+            
+            // Validate BUMP_TYPE
+            if (!['major', 'minor', 'patch'].includes(bumpType)) {
+              throw new Error(`Invalid bump type: ${bumpType}`);
+            }
+            
+            // Fetch tags
+            execSync('git fetch --tags');
+            
+            // Get latest tag
+            let latestTag = '';
+            try {
+              latestTag = execSync('git tag --list "v*" --sort=-v:refname | head -n1', { encoding: 'utf8' }).trim();
+            } catch (e) {
+              latestTag = '';
+            }
+            
+            if (!latestTag) {
+              latestTag = 'v0.0.0';
+            }
+            
+            console.log('Latest tag:', latestTag);
+            
+            // Parse version
+            let ver = latestTag.substring(1); // Remove 'v' prefix
+            const baseVer = ver.split('-')[0]; // Strip prerelease (e.g. -alpha)
+            
+            let [maj, min, pat] = baseVer.split('.').map(x => parseInt(x) || 0);
+            
+            // Bump version
+            switch (bumpType) {
+              case 'major':
+                maj++; min = 0; pat = 0;
+                break;
+              case 'minor':
+                min++; pat = 0;
+                break;
+              case 'patch':
+                pat++;
+                break;
+            }
+            
+            const newBase = `${maj}.${min}.${pat}`;
+            const newVer = appendAlpha === 'true' ? `${newBase}-alpha` : newBase;
+            
+            console.log('New version:', newVer);
+            
+            // Set output for next steps
+            core.setOutput('version', newVer);
         env:
           BUMP_TYPE: ${{ github.event.inputs.bump }}
           APPEND_ALPHA: ${{ github.event.inputs.append_alpha }}
-        run: |
-          set -e
-          echo "Bump type: $BUMP_TYPE"
-          if [ "$BUMP_TYPE" != "major" ] && [ "$BUMP_TYPE" != "minor" ] && [ "$BUMP_TYPE" != "patch" ]; then
-            echo "Invalid bump type: $BUMP_TYPE" >&2
-            exit 1
-          fi
-          git fetch --tags
-          LATEST_TAG=$(git tag --list "v*" --sort=-v:refname | head -n1 || true)
-          if [ -z "$LATEST_TAG" ]; then
-            LATEST_TAG="v0.0.0"
-          fi
-          echo "Latest tag: $LATEST_TAG"
-          VER=${LATEST_TAG#v}
-          # strip prerelease (e.g. -alpha)
-          BASE_VER=${VER%%-*}
-          IFS='.' read -r MAJ MIN PAT <<< "$BASE_VER"
-          MAJ=${MAJ:-0}
-          MIN=${MIN:-0}
-          PAT=${PAT:-0}
-          case "$BUMP_TYPE" in
-            major)
-              MAJ=$((MAJ+1)); MIN=0; PAT=0;;
-            minor)
-              MIN=$((MIN+1)); PAT=0;;
-            patch)
-              PAT=$((PAT+1));;
-          esac
-          NEW_BASE="$MAJ.$MIN.$PAT"
-          if [ "$APPEND_ALPHA" = "true" ]; then
-            NEW_VER="$NEW_BASE-alpha"
-          else
-            NEW_VER="$NEW_BASE"
-          fi
-          echo "version=$NEW_VER" >> $GITHUB_OUTPUT
 
       - name: Create and push tag
         run: |
