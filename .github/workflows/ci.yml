@@ -120,8 +120,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           TAG=v${{ steps.bump.outputs.version }}
+          COMMIT_MSG=$(git log -1 --pretty=%B)
           echo "Creating tag $TAG"
-          git tag -a "$TAG" -m "Release $TAG"
+          git tag -a "$TAG" -m "$COMMIT_MSG"
           git push origin "$TAG"
 
       - name: Create GitHub release
