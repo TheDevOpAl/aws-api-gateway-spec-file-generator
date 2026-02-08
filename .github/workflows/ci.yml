@@ -1,0 +1,135 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  push:
+    branches: [ "main" ]
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Type of version bump: major, minor, or patch'
+        required: true
+        default: 'patch'
+      append_alpha:
+        description: 'Append -alpha to the new version (true/false)'
+        required: false
+        default: 'true'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run a one-line script
+        run: echo Hello, world!
+
+      - name: Run a multi-line script
+        run: |
+          echo Add other actions to build,
+          echo test, and deploy your project.
+
+  bump-version:
+    name: Bump version, tag and create release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Compute next tag from git tags
+        id: bump
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { execSync } = require('child_process');
+            const fs = require('fs');
+            
+            // Get environment variables with defaults
+            const bumpType = process.env.BUMP_TYPE || 'patch';
+            const appendAlpha = process.env.APPEND_ALPHA || 'true';
+            
+            console.log('Bump type:', bumpType);
+            
+            // Validate BUMP_TYPE
+            if (!['major', 'minor', 'patch'].includes(bumpType)) {
+              throw new Error(`Invalid bump type: ${bumpType}`);
+            }
+            
+            // Fetch tags
+            execSync('git fetch --tags');
+            
+            // Get latest tag
+            let latestTag = '';
+            try {
+              latestTag = execSync('git tag --list "v*" --sort=-v:refname | head -n1', { encoding: 'utf8' }).trim();
+            } catch (e) {
+              latestTag = '';
+            }
+            
+            if (!latestTag) {
+              latestTag = 'v0.0.0';
+            }
+            
+            console.log('Latest tag:', latestTag);
+            
+            // Parse version
+            let ver = latestTag.substring(1); // Remove 'v' prefix
+            const baseVer = ver.split('-')[0]; // Strip prerelease (e.g. -alpha)
+            
+            let [maj, min, pat] = baseVer.split('.').map(x => parseInt(x) || 0);
+            
+            // Bump version
+            switch (bumpType) {
+              case 'major':
+                maj++; min = 0; pat = 0;
+                break;
+              case 'minor':
+                min++; pat = 0;
+                break;
+              case 'patch':
+                pat++;
+                break;
+            }
+            
+            const newBase = `${maj}.${min}.${pat}`;
+            const newVer = appendAlpha === 'true' ? `${newBase}-alpha` : newBase;
+            
+            console.log('New version:', newVer);
+            
+            // Set output for next steps
+            core.setOutput('version', newVer);
+        env:
+          BUMP_TYPE: ${{ github.event.inputs.bump }}
+          APPEND_ALPHA: ${{ github.event.inputs.append_alpha }}
+
+      - name: Create and push tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          TAG=v${{ steps.bump.outputs.version }}
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          echo "Creating tag $TAG"
+          git tag -a "$TAG" -m "$COMMIT_MSG"
+          git push origin "$TAG"
+
+      - name: Create GitHub release
+        uses: actions/create-release@v1
+        with:
+          tag_name: v${{ steps.bump.outputs.version }}
+          release_name: v${{ steps.bump.outputs.version }}
+          body: "Release ${{ steps.bump.outputs.version }} (automated)"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
