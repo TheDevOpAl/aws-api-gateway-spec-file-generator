@@ -1,8 +1,9 @@
 name: Publish to npm
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - 'v*'
 
 jobs:
   publish:
@@ -13,7 +14,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.release.tag_name }}
+          ref: ${{ github.ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -34,7 +35,8 @@ jobs:
             const fs = require('fs');
             const path = require('path');
             
-            const tagName = context.payload.release.tag_name;
+            // Extract tag name from ref (e.g., 'refs/tags/v1.2.3' -> 'v1.2.3')
+            const tagName = context.ref.replace('refs/tags/', '');
             console.log('Setting version from tag:', tagName);
             
             // Remove 'v' prefix if present
