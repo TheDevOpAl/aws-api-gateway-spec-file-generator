@@ -1,0 +1,98 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  push:
+    branches: [ "main", "*" ]
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Type of version bump: major, minor, or patch'
+        required: true
+        default: 'patch'
+      append_alpha:
+        description: 'Append -alpha to the new version (true/false)'
+        required: false
+        default: 'true'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run a one-line script
+        run: echo Hello, world!
+
+      - name: Run a multi-line script
+        run: |
+          echo Add other actions to build,
+          echo test, and deploy your project.
+
+  bump-version:
+    name: Bump version, tag and create release
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Bump package.json version
+        id: bump
+        env:
+          BUMP_TYPE: ${{ github.event.inputs.bump }}
+          APPEND_ALPHA: ${{ github.event.inputs.append_alpha }}
+        run: |
+          set -e
+          echo "Bump type: $BUMP_TYPE"
+          if [ "$BUMP_TYPE" != "major" ] && [ "$BUMP_TYPE" != "minor" ] && [ "$BUMP_TYPE" != "patch" ]; then
+            echo "Invalid bump type: $BUMP_TYPE" >&2
+            exit 1
+          fi
+          # Use npm to update version in package.json without creating git tag
+          npm version $BUMP_TYPE --no-git-tag-version
+          # Optionally append -alpha if requested and not already present
+          if [ "$APPEND_ALPHA" = "true" ]; then
+            node -e "const fs=require('fs');const p=require('./package.json'); if(!p.version.endsWith('-alpha')) p.version=p.version.replace(/-alpha$/,'')+'-alpha'; fs.writeFileSync('package.json',JSON.stringify(p,null,2)+"\n");"
+          fi
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Show new version
+        run: echo "New version is ${{ steps.bump.outputs.version }}"
+
+      - name: Commit version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json || true
+          git commit -m "chore(release): ${{ steps.bump.outputs.version }}" || echo "No changes to commit"
+          git push origin HEAD
+
+      - name: Create tag
+        run: |
+          TAG=v${{ steps.bump.outputs.version }}
+          git tag "$TAG"
+          git push origin "$TAG"
+
+      - name: Create GitHub release
+        uses: actions/create-release@v1
+        with:
+          tag_name: v${{ steps.bump.outputs.version }}
+          release_name: v${{ steps.bump.outputs.version }}
+          body: "Release ${{ steps.bump.outputs.version }} (automated)"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
