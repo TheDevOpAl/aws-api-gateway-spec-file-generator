@@ -1,5 +1,9 @@
-const consoleLogHelloWorld = () => {
-    console.log("Hello, World!");
-};
+import { OpenApiSpec } from './OpenApiSpec/openApiSpec.ts';
+const OpenApiSpecInstance = new OpenApiSpec();
 
-export default consoleLogHelloWorld;
+OpenApiSpecInstance.setOpenApiVersion("3.0.1");
+
+const specFileContent = OpenApiSpecInstance.getOpenApiSpecContent();
+console.log(specFileContent);
+
+// OpenApiSpecInstance.writeOpenApiSpec();
