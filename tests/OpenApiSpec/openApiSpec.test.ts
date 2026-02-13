@@ -17,11 +17,7 @@ describe("OpenApiSpec", () => {
   it("should allow setting OpenAPI version", () => {
     spec.setOpenApiVersion("3.1.0");
     // Note: You may need to add a getter to verify this
-    expect(spec).toBeDefined();
-  });
-
-  it("should have writeOpenApiSpec method", () => {
-    expect(spec.writeOpenApiSpec).toBeDefined();
-    expect(typeof spec.writeOpenApiSpec).toBe("function");
+    const content = spec.getOpenApiSpecContent();
+    expect(content).toEqual({components: {}, openapi: "3.1.0", paths: {}, securitySchemes: {}});
   });
 });
