@@ -1,5 +1,2 @@
-const consoleLogHelloWorld = () => {
-    console.log("Hello, World!");
-};
-
-export default consoleLogHelloWorld;
+import { OpenApiSpec } from './OpenApiSpec/openApiSpec.ts';
+export { OpenApiSpec };
