@@ -1,4 +1,4 @@
-import { OpenApiSpec } from "../../src/OpenApiSpec/openApiSpec.ts";
+import { OpenApiSpec } from "../../src/index.ts";
 
 describe("OpenApiSpec", () => {
   let spec: OpenApiSpec;
