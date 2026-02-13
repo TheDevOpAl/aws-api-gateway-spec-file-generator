@@ -1,2 +1,2 @@
-import { OpenApiSpec } from './OpenApiSpec/openApiSpec.ts';
+import { OpenApiSpec } from './OpenApiSpec/openApiSpec';
 export { OpenApiSpec };
