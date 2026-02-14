@@ -18,8 +18,6 @@ export class OpenApiSpec {
         }
     }
 
-    constructor() {}
-
     setOpenApiVersion(version: string): void {
         this.openApi = version;
     }
