@@ -1,7 +1,8 @@
 {
   "name": "api-spec-generator",
   "description": "",
-  "main": "dist/index.js",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "build": "tsc",
     "test": "jest",
