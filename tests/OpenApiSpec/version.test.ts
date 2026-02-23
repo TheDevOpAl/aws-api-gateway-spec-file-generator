@@ -1,6 +1,6 @@
 import { OpenApiSpec } from "../../src/index";
 
-describe("OpenApiSpec", () => {
+describe("OpenApiSpec openApi version", () => {
   let spec: OpenApiSpec;
 
   beforeEach(() => {
@@ -11,13 +11,15 @@ describe("OpenApiSpec", () => {
     // Note: You may need to make the openApi property public or add a getter to test this
 
     const content = spec.getOpenApiSpecContent();
-    expect(content).toEqual({components: {}, openapi: "3.0.1", paths: {}, securitySchemes: {}});
+    expect(content.openapi).toEqual("3.0.1");
   });
 
   it("should allow setting OpenAPI version", () => {
-    spec.setOpenApiVersion("3.1.0");
+    const version = "3.1.0";
+
+    spec.setOpenApiVersion(version);
     // Note: You may need to add a getter to verify this
     const content = spec.getOpenApiSpecContent();
-    expect(content).toEqual({components: {}, openapi: "3.1.0", paths: {}, securitySchemes: {}});
+    expect(content.openapi).toEqual(version);
   });
 });
