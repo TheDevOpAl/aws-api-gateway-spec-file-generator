@@ -1,15 +1,13 @@
-import { writeFileSync } from "fs";
+import { AddRouteParams } from "../types/AddRouteParams";
+import { PathItem } from "../types/PathItem";
 
 export class OpenApiSpec {
     private openApi: string = "3.0.1";
-
-    private paths: any = {};
+    private paths: Record<string, PathItem> = {};
     private components: any = {};
     private securitySchemes: any = {};
-    private writeToYamlFile: boolean = false;
-    private fileName: string = "openapi-spec";
-    private pathToFiles: string = "./";
-    public getOpenApiSpecContent(): any {
+
+    public getOpenApiSpecContent() {
         return {
             openapi: this.openApi,
             paths: this.paths,
@@ -22,17 +20,17 @@ export class OpenApiSpec {
         this.openApi = version;
     }
 
-    setFileName(fileName: string): void {
-        this.fileName = fileName;
-    }
+    addRoute({routeName, method, summary}: AddRouteParams): void {
 
-    setPathToFiles(pathToFiles: string): void {
-        this.pathToFiles = pathToFiles;
-    }
+        if (this.paths[routeName]?.[method]) {
+            throw new Error(`Method ${method} already exists for route ${routeName}`);
+        }
 
-    writeOpenApiSpec(): void {
-        const specFileContent = this.getOpenApiSpecContent();
-
-        writeFileSync(`${this.pathToFiles}${this.fileName}.${this.writeToYamlFile ? "yaml" : "json"}`, JSON.stringify(specFileContent, null, 2));
+        this.paths[routeName] = {
+            ...this.paths[routeName],
+            [method]: {
+                summary
+            }
+        };
     }
 }
