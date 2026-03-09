@@ -4,12 +4,9 @@ export default {
   testRegex: ".*\\.test\\.ts$",
   extensionsToTreatAsEsm: [".ts"],
   transform: {
-    "^.+\\.tsx?$": ["ts-jest", { useESM: true, tsconfig: "tsconfig.jest.json" }],
+    "^.+\\.ts?$": ["ts-jest", { useESM: true, tsconfig: "tsconfig.jest.json" }],
   },
-  moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
-  collectCoverageFrom: [
-    "src/**/*.ts",
-    "!src/**/*.d.ts",
-    "!src/test.ts",
-  ],
+  moduleFileExtensions: ["ts", "js", "json", "node"],
+  collectCoverageFrom: ["src/**/*.ts", "!src/**/*.d.ts", "!src/test.ts"],
+  moduleDirectories: ["node_modules", "src"],
 };

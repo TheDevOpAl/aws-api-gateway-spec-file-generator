@@ -5,19 +5,19 @@ name: CI
 # Controls when the workflow will run
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   release:
     types: [published]
   workflow_dispatch:
     inputs:
       bump:
-        description: 'Type of version bump: major, minor, or patch'
+        description: "Type of version bump: major, minor, or patch"
         required: true
-        default: 'patch'
+        default: "patch"
       append_alpha:
-        description: 'Append -alpha to the new version (true/false)'
+        description: "Append -alpha to the new version (true/false)"
         required: false
-        default: 'true'
+        default: "true"
 
 jobs:
   bump-version:
@@ -34,7 +34,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "22"
 
       - name: Compute next tag from git tags
         id: bump
@@ -43,21 +43,21 @@ jobs:
           script: |
             const { execSync } = require('child_process');
             const fs = require('fs');
-            
+
             // Get environment variables with defaults
             const bumpType = process.env.BUMP_TYPE || 'patch';
             const appendAlpha = process.env.APPEND_ALPHA || 'true';
-            
+
             console.log('Bump type:', bumpType);
-            
+
             // Validate BUMP_TYPE
             if (!['major', 'minor', 'patch'].includes(bumpType)) {
               throw new Error(`Invalid bump type: ${bumpType}`);
             }
-            
+
             // Fetch tags
             execSync('git fetch --tags');
-            
+
             // Get latest tag
             let latestTag = '';
             try {
@@ -65,19 +65,19 @@ jobs:
             } catch (e) {
               latestTag = '';
             }
-            
+
             if (!latestTag) {
               latestTag = 'v0.0.0';
             }
-            
+
             console.log('Latest tag:', latestTag);
-            
+
             // Parse version
             let ver = latestTag.substring(1); // Remove 'v' prefix
             const baseVer = ver.split('-')[0]; // Strip prerelease (e.g. -alpha)
-            
+
             let [maj, min, pat] = baseVer.split('.').map(x => parseInt(x) || 0);
-            
+
             // Bump version
             switch (bumpType) {
               case 'major':
@@ -90,12 +90,12 @@ jobs:
                 pat++;
                 break;
             }
-            
+
             const newBase = `${maj}.${min}.${pat}`;
             const newVer = appendAlpha === 'true' ? `${newBase}-alpha` : newBase;
-            
+
             console.log('New version:', newVer);
-            
+
             // Set output for next steps
             core.setOutput('version', newVer);
         env:
@@ -138,7 +138,7 @@ jobs:
         with:
           script: |
             const { execSync } = require('child_process');
-            
+
             // Get the latest tag
             let latestTag = '';
             try {
@@ -147,10 +147,10 @@ jobs:
               console.log('No tags found');
               latestTag = '';
             }
-            
+
             console.log('Latest tag:', latestTag);
             core.setOutput('tag', latestTag);
-            
+
             if (!latestTag) {
               core.setFailed('No tag found');
             }
@@ -158,8 +158,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
 
       - name: Install dependencies
         run: npm ci
@@ -173,23 +173,23 @@ jobs:
           script: |
             const fs = require('fs');
             const path = require('path');
-            
+
             const tagName = '${{ steps.get-tag.outputs.tag }}';
             console.log('Setting version from tag:', tagName);
-            
+
             // Remove 'v' prefix if present
             const version = tagName.startsWith('v') ? tagName.slice(1) : tagName;
-            
+
             // Read package.json
             const packageJsonPath = path.join(process.cwd(), 'package.json');
             const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-            
+
             // Update version
             packageJson.version = version;
-            
+
             // Write back
             fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
-            
+
             console.log('Updated package.json version to:', version);
 
       - name: Publish to npm

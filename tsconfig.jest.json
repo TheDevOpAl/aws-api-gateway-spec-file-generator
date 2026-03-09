@@ -5,5 +5,5 @@
     "noEmit": true,
     "module": "esnext"
   },
-  "include": ["src", "tests"]
+  "include": ["src", "tests", "node_modules"]
 }
