@@ -1,4 +1,4 @@
-import { OpenApiSpec, AddRouteParams } from "../../src/index";
+import { OpenApiSpec, AddRouteParams, RequestValidationEnum } from "../../src/index";
 
 describe("OpenApiSpec paths", () => {
     let spec: OpenApiSpec;
@@ -55,5 +55,12 @@ describe("OpenApiSpec paths", () => {
 
         const content = spec.getOpenApiSpecContent();
         expect(content.paths).toEqual({ "users/{userId}": { get: { summary: "Get user by ID" }, post: { summary: "Create a user by ID" } }, users: { post: { summary: "Get user by ID again" } } });
+    })
+
+    it("Should add request validation to a route if provided", () => {
+        const path: AddRouteParams = { routeName: "users/{userId}", method: "get", summary: "Get user by ID", requestValidator: RequestValidationEnum.STRICT };
+        spec.addRoute(path);
+        const content = spec.getOpenApiSpecContent();
+        expect(content.paths).toEqual({ "users/{userId}": { get: { summary: "Get user by ID", "x-amazon-apigateway-request-validator": "strict" } } });
     })
 });

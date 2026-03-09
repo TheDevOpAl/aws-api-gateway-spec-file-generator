@@ -37,7 +37,7 @@ export class OpenApiSpec {
         this.openApi = version;
     }
 
-    public addRoute({routeName, method, summary}: AddRouteParams): void {
+    public addRoute({routeName, method, summary, requestValidator}: AddRouteParams): void {
 
         if (this.paths[routeName]?.[method]) {
             throw new Error(`Method ${method} already exists for route ${routeName}`);
@@ -47,6 +47,13 @@ export class OpenApiSpec {
             ...this.paths[routeName],
             [method]: {
                 summary
+            }
+        };
+
+        if (requestValidator) {
+            this.paths![routeName]![method] = {
+                ...this.paths[routeName]![method]!,
+                "x-amazon-apigateway-request-validator": requestValidator
             }
         };
     }
