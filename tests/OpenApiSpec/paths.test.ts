@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { OpenApiSpec, AddRouteParams, RequestValidationEnum } from "../../src/index";
+import {
+  OpenApiSpec,
+  AddRouteParams,
+  RequestValidationEnum,
+  RequestParameterType,
+} from "../../src/index";
 
 describe("OpenApiSpec paths", () => {
   let spec: OpenApiSpec;
@@ -143,7 +148,6 @@ describe("OpenApiSpec paths", () => {
     spec.addRoute(path);
     const content = spec.getOpenApiSpecContent();
 
-    console.log(JSON.stringify(content.paths, null, 2));
     expect(content.paths).toEqual({
       "users/{userId}": {
         get: {
@@ -164,6 +168,72 @@ describe("OpenApiSpec paths", () => {
           },
         },
       },
+    });
+  });
+
+  it("Should add request parameters to a route if provided", () => {
+    const path: AddRouteParams = {
+      routeName: "users/{userId}",
+      method: "get",
+      summary: "Get user by ID",
+      requestParameters: [
+        {
+          name: "userId",
+          type: RequestParameterType.PATH,
+          required: true,
+          description: "The ID of the user",
+          schema: z.uuid(),
+        },
+      ],
+    };
+
+    spec.addRoute(path);
+    const content = spec.getOpenApiSpecContent();
+
+    expect(content).toEqual({
+      openapi: "3.0.1",
+      paths: {
+        "users/{userId}": {
+          get: {
+            summary: "Get user by ID",
+            parameters: [
+              {
+                name: "userId",
+                in: "path",
+                required: true,
+                description: "The ID of the user",
+                schema: {
+                  type: "string",
+                  format: "uuid",
+                  pattern:
+                    "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                },
+              },
+            ],
+          },
+        },
+      },
+      components: {},
+      securitySchemes: {},
+      "x-amazon-apigateway-request-validators": {
+        none: {
+          validateRequestBody: false,
+          validateRequestParameters: false,
+        },
+        strict: {
+          validateRequestBody: true,
+          validateRequestParameters: true,
+        },
+        "request-body-only": {
+          validateRequestBody: true,
+          validateRequestParameters: false,
+        },
+        "request-parameter-only": {
+          validateRequestBody: false,
+          validateRequestParameters: true,
+        },
+      },
+      "x-amazon-apigateway-request-validator": "none",
     });
   });
 });
