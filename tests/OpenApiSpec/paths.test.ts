@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { OpenApiSpec, AddRouteParams, RequestValidationEnum } from "../../src/index";
 
 describe("OpenApiSpec paths", () => {
@@ -59,6 +60,14 @@ describe("OpenApiSpec paths", () => {
 
     it("Should add request validation to a route if provided", () => {
         const path: AddRouteParams = { routeName: "users/{userId}", method: "get", summary: "Get user by ID", requestValidator: RequestValidationEnum.STRICT };
+        spec.addRoute(path);
+        const content = spec.getOpenApiSpecContent();
+        expect(content.paths).toEqual({ "users/{userId}": { get: { summary: "Get user by ID", "x-amazon-apigateway-request-validator": "strict" } } });
+    })
+
+    it("Should add a requestBody to a route if provided", () => {
+        const myZodObj = z.object({my: 'test', num: 1});
+        const path: AddRouteParams = { routeName: "users/{userId}", method: "get", summary: "Get user by ID", requestValidator: RequestValidationEnum.STRICT, requestBodySchema: myZodObj};
         spec.addRoute(path);
         const content = spec.getOpenApiSpecContent();
         expect(content.paths).toEqual({ "users/{userId}": { get: { summary: "Get user by ID", "x-amazon-apigateway-request-validator": "strict" } } });

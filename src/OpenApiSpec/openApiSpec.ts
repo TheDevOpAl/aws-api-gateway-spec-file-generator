@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { AddRouteParams } from "../types/AddRouteParams";
 import { PathItem } from "../types/PathItem";
 import { RequestValidationEnum, RequestValidators } from "../types/RequestValidators";
@@ -37,7 +38,7 @@ export class OpenApiSpec {
         this.openApi = version;
     }
 
-    public addRoute({routeName, method, summary, requestValidator}: AddRouteParams): void {
+    public addRoute({routeName, method, summary, requestValidator, requestBodySchema}: AddRouteParams): void {
 
         if (this.paths[routeName]?.[method]) {
             throw new Error(`Method ${method} already exists for route ${routeName}`);
@@ -56,5 +57,13 @@ export class OpenApiSpec {
                 "x-amazon-apigateway-request-validator": requestValidator
             }
         };
+
+        if (requestBodySchema) {
+            const {$schema, ...rest} = z.toJSONSchema(requestBodySchema);
+            this.paths![routeName]![method] = {
+                ...this.paths[routeName]![method]!,
+                requestBody: rest
+            }
+        }
     }
 }
