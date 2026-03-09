@@ -10,6 +10,16 @@ export class OpenApiSpec {
     private securitySchemes: any = {};
     private "x-amazon-apigateway-request-validators": RequestValidators = {}
 
+    private validationBlockCreatedIfNeeded(requestValidationKey: string): void {
+        if (!this["x-amazon-apigateway-request-validators"][requestValidationKey]) {
+            this["x-amazon-apigateway-request-validators"][requestValidationKey] = {
+                validateRequestBody: false,
+                validateRequestParameters: false
+            }
+        }
+    }
+
+
     public getOpenApiSpecContent(): SpecFileContent {
 
         const specContent: SpecFileContent = {
@@ -27,31 +37,22 @@ export class OpenApiSpec {
     }
 
     public setRequestBodyValidation(requestValidationKey: string): void {
-        if (!this["x-amazon-apigateway-request-validators"][requestValidationKey]) {
-            this["x-amazon-apigateway-request-validators"][requestValidationKey] = {
-                validateRequestBody: false,
-                validateRequestParameters: false
-            }
-        }
+        this.validationBlockCreatedIfNeeded(requestValidationKey);
 
         this["x-amazon-apigateway-request-validators"][requestValidationKey].validateRequestBody = true;
     }
 
     public setRequestParameterValidation(requestValidationKey: string): void {
-        if (!this["x-amazon-apigateway-request-validators"][requestValidationKey]) {
-            this["x-amazon-apigateway-request-validators"][requestValidationKey] = {
-                validateRequestBody: false,
-                validateRequestParameters: false
-            }
-        }
+        this.validationBlockCreatedIfNeeded(requestValidationKey);
+
         this["x-amazon-apigateway-request-validators"][requestValidationKey].validateRequestParameters = true;
     }
 
-    setOpenApiVersion(version: string): void {
+    public setOpenApiVersion(version: string): void {
         this.openApi = version;
     }
 
-    addRoute({routeName, method, summary}: AddRouteParams): void {
+    public addRoute({routeName, method, summary}: AddRouteParams): void {
 
         if (this.paths[routeName]?.[method]) {
             throw new Error(`Method ${method} already exists for route ${routeName}`);
