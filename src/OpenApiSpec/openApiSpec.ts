@@ -1,6 +1,6 @@
 import { AddRouteParams } from "../types/AddRouteParams";
 import { PathItem } from "../types/PathItem";
-import { RequestValidators } from "../types/RequestValidators";
+import { RequestValidationEnum, RequestValidators } from "../types/RequestValidators";
 import { SpecFileContent } from "../types/SpecFileContent";
 
 export class OpenApiSpec {
@@ -8,44 +8,29 @@ export class OpenApiSpec {
     private paths: Record<string, PathItem> = {};
     private components: any = {};
     private securitySchemes: any = {};
-    private "x-amazon-apigateway-request-validators": RequestValidators = {}
-
-    private validationBlockCreatedIfNeeded(requestValidationKey: string): void {
-        if (!this["x-amazon-apigateway-request-validators"][requestValidationKey]) {
-            this["x-amazon-apigateway-request-validators"][requestValidationKey] = {
-                validateRequestBody: false,
-                validateRequestParameters: false
-            }
-        }
-    }
-
+    private xAmazonApigatewayRequestValidators: RequestValidators = {
+        [RequestValidationEnum.NONE]: { validateRequestBody: false, validateRequestParameters: false },
+        [RequestValidationEnum.STRICT]: { validateRequestBody: true, validateRequestParameters: true },
+        [RequestValidationEnum.REQUEST_BODY_VALIDATION_ONLY]: { validateRequestBody: true, validateRequestParameters: false },
+        [RequestValidationEnum.REQUEST_PARAMETER_VALIDATION_ONLY]: { validateRequestBody: false, validateRequestParameters: true }
+    };
+    private xAmazonApigatewayRequestValidator: RequestValidationEnum = RequestValidationEnum.NONE;
 
     public getOpenApiSpecContent(): SpecFileContent {
-
         const specContent: SpecFileContent = {
             openapi: this.openApi,
             paths: this.paths,
             components: this.components,
-            securitySchemes: this.securitySchemes
-        }
-
-        if (this["x-amazon-apigateway-request-validators"]) {
-            specContent["x-amazon-apigateway-request-validators"] = this["x-amazon-apigateway-request-validators"];
+            securitySchemes: this.securitySchemes,
+            "x-amazon-apigateway-request-validators": this.xAmazonApigatewayRequestValidators,
+            "x-amazon-apigateway-request-validator": this.xAmazonApigatewayRequestValidator
         }
 
         return specContent
     }
 
-    public setRequestBodyValidation(requestValidationKey: string): void {
-        this.validationBlockCreatedIfNeeded(requestValidationKey);
-
-        this["x-amazon-apigateway-request-validators"][requestValidationKey].validateRequestBody = true;
-    }
-
-    public setRequestParameterValidation(requestValidationKey: string): void {
-        this.validationBlockCreatedIfNeeded(requestValidationKey);
-
-        this["x-amazon-apigateway-request-validators"][requestValidationKey].validateRequestParameters = true;
+    public setGlobalRequestValidator(requestValidator: RequestValidationEnum): void {
+        this.xAmazonApigatewayRequestValidator = requestValidator;
     }
 
     public setOpenApiVersion(version: string): void {
