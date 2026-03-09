@@ -1,5 +1,5 @@
 import { PathItem } from "./PathItem";
-import { RequestValidators } from "./RequestValidators";
+import { RequestValidationEnum, RequestValidators } from "./RequestValidators";
 
 export type SpecFileContent = {
     openapi: string;
@@ -7,4 +7,5 @@ export type SpecFileContent = {
     components: any;
     securitySchemes: any;
     "x-amazon-apigateway-request-validators"?: RequestValidators;
+    "x-amazon-apigateway-request-validator": RequestValidationEnum;
 }
