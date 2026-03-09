@@ -9,7 +9,8 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint": "eslint \"src/**/*.ts\" --fix",
-    "lint-ci": "eslint \"src/**/*.ts\""
+    "lint-ci": "eslint \"src/**/*.ts\"",
+    "prettier": "prettier --write ."
   },
   "repository": {
     "type": "git",
@@ -26,6 +27,7 @@
     "@types/node": "^25.2.3",
     "eslint": "^9.39.2",
     "neostandard": "^0.12.2",
+    "prettier": "^3.8.1",
     "ts-jest": "^29.4.6",
     "typescript": "^5.9.3"
   },

@@ -5,65 +5,82 @@ import { RequestValidationEnum, RequestValidators } from "../types/RequestValida
 import { SpecFileContent } from "../types/SpecFileContent";
 
 export class OpenApiSpec {
-    private openApi: string = "3.0.1";
-    private paths: Record<string, PathItem> = {};
-    private components: any = {};
-    private securitySchemes: any = {};
-    private xAmazonApigatewayRequestValidators: RequestValidators = {
-        [RequestValidationEnum.NONE]: { validateRequestBody: false, validateRequestParameters: false },
-        [RequestValidationEnum.STRICT]: { validateRequestBody: true, validateRequestParameters: true },
-        [RequestValidationEnum.REQUEST_BODY_VALIDATION_ONLY]: { validateRequestBody: true, validateRequestParameters: false },
-        [RequestValidationEnum.REQUEST_PARAMETER_VALIDATION_ONLY]: { validateRequestBody: false, validateRequestParameters: true }
+  private openApi: string = "3.0.1";
+  private paths: Record<string, PathItem> = {};
+  private components: any = {};
+  private securitySchemes: any = {};
+  private xAmazonApigatewayRequestValidators: RequestValidators = {
+    [RequestValidationEnum.NONE]: {
+      validateRequestBody: false,
+      validateRequestParameters: false,
+    },
+    [RequestValidationEnum.STRICT]: {
+      validateRequestBody: true,
+      validateRequestParameters: true,
+    },
+    [RequestValidationEnum.REQUEST_BODY_VALIDATION_ONLY]: {
+      validateRequestBody: true,
+      validateRequestParameters: false,
+    },
+    [RequestValidationEnum.REQUEST_PARAMETER_VALIDATION_ONLY]: {
+      validateRequestBody: false,
+      validateRequestParameters: true,
+    },
+  };
+  private xAmazonApigatewayRequestValidator: RequestValidationEnum = RequestValidationEnum.NONE;
+
+  public getOpenApiSpecContent(): SpecFileContent {
+    const specContent: SpecFileContent = {
+      openapi: this.openApi,
+      paths: this.paths,
+      components: this.components,
+      securitySchemes: this.securitySchemes,
+      "x-amazon-apigateway-request-validators": this.xAmazonApigatewayRequestValidators,
+      "x-amazon-apigateway-request-validator": this.xAmazonApigatewayRequestValidator,
     };
-    private xAmazonApigatewayRequestValidator: RequestValidationEnum = RequestValidationEnum.NONE;
 
-    public getOpenApiSpecContent(): SpecFileContent {
-        const specContent: SpecFileContent = {
-            openapi: this.openApi,
-            paths: this.paths,
-            components: this.components,
-            securitySchemes: this.securitySchemes,
-            "x-amazon-apigateway-request-validators": this.xAmazonApigatewayRequestValidators,
-            "x-amazon-apigateway-request-validator": this.xAmazonApigatewayRequestValidator
-        }
+    return specContent;
+  }
 
-        return specContent
+  public setGlobalRequestValidator(requestValidator: RequestValidationEnum): void {
+    this.xAmazonApigatewayRequestValidator = requestValidator;
+  }
+
+  public setOpenApiVersion(version: string): void {
+    this.openApi = version;
+  }
+
+  public addRoute({
+    routeName,
+    method,
+    summary,
+    requestValidator,
+    requestBodySchema,
+  }: AddRouteParams): void {
+    if (this.paths[routeName]?.[method]) {
+      throw new Error(`Method ${method} already exists for route ${routeName}`);
     }
 
-    public setGlobalRequestValidator(requestValidator: RequestValidationEnum): void {
-        this.xAmazonApigatewayRequestValidator = requestValidator;
+    this.paths[routeName] = {
+      ...this.paths[routeName],
+      [method]: {
+        summary,
+      },
+    };
+
+    if (requestValidator) {
+      this.paths![routeName]![method] = {
+        ...this.paths[routeName]![method]!,
+        "x-amazon-apigateway-request-validator": requestValidator,
+      };
     }
 
-    public setOpenApiVersion(version: string): void {
-        this.openApi = version;
+    if (requestBodySchema) {
+      const { $schema, ...rest } = z.toJSONSchema(requestBodySchema);
+      this.paths![routeName]![method] = {
+        ...this.paths[routeName]![method]!,
+        requestBody: rest,
+      };
     }
-
-    public addRoute({routeName, method, summary, requestValidator, requestBodySchema}: AddRouteParams): void {
-
-        if (this.paths[routeName]?.[method]) {
-            throw new Error(`Method ${method} already exists for route ${routeName}`);
-        }
-
-        this.paths[routeName] = {
-            ...this.paths[routeName],
-            [method]: {
-                summary
-            }
-        };
-
-        if (requestValidator) {
-            this.paths![routeName]![method] = {
-                ...this.paths[routeName]![method]!,
-                "x-amazon-apigateway-request-validator": requestValidator
-            }
-        };
-
-        if (requestBodySchema) {
-            const {$schema, ...rest} = z.toJSONSchema(requestBodySchema);
-            this.paths![routeName]![method] = {
-                ...this.paths[routeName]![method]!,
-                requestBody: rest
-            }
-        }
-    }
+  }
 }

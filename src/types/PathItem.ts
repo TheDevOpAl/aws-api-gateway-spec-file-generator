@@ -4,9 +4,9 @@ import { RequestValidationEnum } from "./RequestValidators";
 import { z } from "zod";
 
 export type PathItem = {
-    [key in HttpMethod]?: {
-        summary: string;
-        "x-amazon-apigateway-request-validator"?: RequestValidationEnum;
-        requestBody?: Omit<ZodStandardJSONSchemaPayload<z.ZodObject>, '$schema'>;
-    };
+  [key in HttpMethod]?: {
+    summary: string;
+    "x-amazon-apigateway-request-validator"?: RequestValidationEnum;
+    requestBody?: Omit<ZodStandardJSONSchemaPayload<z.ZodObject>, "$schema">;
+  };
 };
