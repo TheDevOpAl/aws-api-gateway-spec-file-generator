@@ -15,6 +15,7 @@ export class OpenApiSpec {
   private openApi: string = "3.0.1";
   private paths: Record<string, PathItem> = {};
   private securitySchemes: SecurityScheme = {};
+  private info: string = "basic info";
   private security: Record<string, string[]>[] = [];
   private xAmazonApigatewayRequestValidators: RequestValidators = {
     [RequestValidationEnum.NONE]: {
@@ -40,6 +41,7 @@ export class OpenApiSpec {
     const specContent: SpecFileContent = {
       openapi: this.openApi,
       paths: this.paths,
+      info: this.info,
       components: {
         securitySchemes: this.securitySchemes,
       },
@@ -49,6 +51,10 @@ export class OpenApiSpec {
     };
 
     return specContent;
+  }
+
+  public setRouteInfo(info: string): void {
+    this.info = info;
   }
 
   public setGlobalRequestValidator(requestValidator: RequestValidationEnum): void {
@@ -72,13 +78,30 @@ export class OpenApiSpec {
     }
   }
 
-  private addRequestBody(routeName: string, method: string, requestBodySchema?: z.ZodObject): void {
+  private addRequestBody({
+    routeName,
+    method,
+    requestBodySchema,
+    requestBodyContentType,
+  }: {
+    routeName: string;
+    method: string;
+    requestBodySchema?: z.ZodObject;
+    requestBodyContentType: string;
+  }): void {
     if (requestBodySchema) {
       const { $schema, ...rest } = z.toJSONSchema(requestBodySchema);
 
       this.paths![routeName]![method as keyof PathItem] = {
         ...this.paths[routeName]![method as keyof PathItem]!,
-        requestBody: rest,
+        requestBody: {
+          required: true,
+          content: {
+            [requestBodyContentType]: {
+              schema: rest,
+            },
+          },
+        },
       };
     }
   }
@@ -144,6 +167,8 @@ export class OpenApiSpec {
     summary,
     requestValidator,
     requestBodySchema,
+    requestBodyContentType = "application/json",
+    responses = {},
     requestParameters = [],
   }: AddRouteParams): void {
     if (this.paths[routeName]?.[method]) {
@@ -154,12 +179,13 @@ export class OpenApiSpec {
       ...this.paths[routeName],
       [method]: {
         summary,
+        responses,
       },
     };
 
     this.addRequestValidator(routeName, method, requestValidator);
 
-    this.addRequestBody(routeName, method, requestBodySchema);
+    this.addRequestBody({ routeName, method, requestBodySchema, requestBodyContentType });
 
     this.addRequestParameters(routeName, method, requestParameters);
   }

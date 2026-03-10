@@ -6,6 +6,7 @@ import {
   RequestValidationEnum,
   RequestParameterType,
 } from "../../src/index";
+import { info } from "node:console";
 
 describe("OpenApiSpec paths", () => {
   let spec: OpenApiSpec;
@@ -27,7 +28,7 @@ describe("OpenApiSpec paths", () => {
     };
     spec.addRoute(path);
     const content = spec.getOpenApiSpecContent();
-    expect(content.paths).toEqual({ users: { get: { summary: "Get all users" } } });
+    expect(content.paths).toEqual({ users: { get: { summary: "Get all users", responses: {} } } });
   });
 
   it("should allow setting paths with a post request and get request", () => {
@@ -45,7 +46,10 @@ describe("OpenApiSpec paths", () => {
     spec.addRoute(path2);
     const content = spec.getOpenApiSpecContent();
     expect(content.paths).toEqual({
-      users: { get: { summary: "Get all users" }, post: { summary: "Create a post" } },
+      users: {
+        get: { summary: "Get all users", responses: {} },
+        post: { summary: "Create a post", responses: {} },
+      },
     });
   });
 
@@ -64,8 +68,8 @@ describe("OpenApiSpec paths", () => {
     spec.addRoute(path2);
     const content = spec.getOpenApiSpecContent();
     expect(content.paths).toEqual({
-      users: { get: { summary: "Get all users" } },
-      products: { post: { summary: "Create a product" } },
+      users: { get: { summary: "Get all users", responses: {} } },
+      products: { post: { summary: "Create a product", responses: {} } },
     });
   });
 
@@ -108,10 +112,10 @@ describe("OpenApiSpec paths", () => {
     const content = spec.getOpenApiSpecContent();
     expect(content.paths).toEqual({
       "users/{userId}": {
-        get: { summary: "Get user by ID" },
-        post: { summary: "Create a user by ID" },
+        get: { summary: "Get user by ID", responses: {} },
+        post: { summary: "Create a user by ID", responses: {} },
       },
-      users: { post: { summary: "Get user by ID again" } },
+      users: { post: { summary: "Get user by ID again", responses: {} } },
     });
   });
 
@@ -127,6 +131,7 @@ describe("OpenApiSpec paths", () => {
     expect(content.paths).toEqual({
       "users/{userId}": {
         get: {
+          responses: {},
           summary: "Get user by ID",
           "x-amazon-apigateway-request-validator": "strict",
         },
@@ -141,8 +146,8 @@ describe("OpenApiSpec paths", () => {
     });
     const path: AddRouteParams = {
       routeName: "users/{userId}",
-      method: "get",
-      summary: "Get user by ID",
+      method: "post",
+      summary: "Create user",
       requestValidator: RequestValidationEnum.STRICT,
       requestBodySchema: myZodObj,
     };
@@ -151,21 +156,29 @@ describe("OpenApiSpec paths", () => {
 
     expect(content.paths).toEqual({
       "users/{userId}": {
-        get: {
-          summary: "Get user by ID",
+        post: {
+          summary: "Create user",
           "x-amazon-apigateway-request-validator": "strict",
+          responses: {},
           requestBody: {
-            type: "object",
-            properties: {
-              name: {
-                type: "string",
-              },
-              age: {
-                type: "number",
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    name: {
+                      type: "string",
+                    },
+                    age: {
+                      type: "number",
+                    },
+                  },
+                  required: ["name"],
+                  additionalProperties: false,
+                },
               },
             },
-            required: ["name"],
-            additionalProperties: false,
           },
         },
       },
@@ -193,10 +206,12 @@ describe("OpenApiSpec paths", () => {
 
     expect(content).toEqual({
       openapi: "3.0.1",
+      info: "basic info",
       paths: {
         "users/{userId}": {
           get: {
             summary: "Get user by ID",
+            responses: {},
             parameters: [
               {
                 name: "userId",
