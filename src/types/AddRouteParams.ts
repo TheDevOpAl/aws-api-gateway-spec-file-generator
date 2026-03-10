@@ -9,5 +9,7 @@ export type AddRouteParams = {
   summary: string;
   requestValidator?: RequestValidationEnum;
   requestBodySchema?: z.ZodObject;
+  requestBodyContentType?: string;
+  responses?: {};
   requestParameters?: RequestParameter[];
 };

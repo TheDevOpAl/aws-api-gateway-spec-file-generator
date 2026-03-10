@@ -28,6 +28,7 @@ describe("OpenApiSpec security", () => {
     expect(content).toEqual({
       openapi: "3.0.1",
       paths: {},
+      info: "basic info",
       components: {
         securitySchemes: {
           MyAuthorizer: {
@@ -83,6 +84,7 @@ describe("OpenApiSpec security", () => {
     expect(content).toEqual({
       openapi: "3.0.1",
       paths: {},
+      info: "basic info",
       components: {
         securitySchemes: {
           TokenAuthorizer: {
@@ -137,6 +139,7 @@ describe("OpenApiSpec security", () => {
     expect(content).toEqual({
       openapi: "3.0.1",
       paths: {},
+      info: "basic info",
       components: {
         securitySchemes: {
           DefaultUriAuthorizer: {
