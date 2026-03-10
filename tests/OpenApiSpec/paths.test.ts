@@ -1,3 +1,4 @@
+import { SecurityScheme } from "./../../src/types/AwsAuthorizerSheme";
 import { z } from "zod";
 import {
   OpenApiSpec,
@@ -213,8 +214,10 @@ describe("OpenApiSpec paths", () => {
           },
         },
       },
-      components: {},
-      securitySchemes: {},
+      components: {
+        securitySchemes: {},
+      },
+      security: [],
       "x-amazon-apigateway-request-validators": {
         none: {
           validateRequestBody: false,

@@ -4,12 +4,18 @@ import { PathItem } from "../types/PathItem";
 import { RequestValidationEnum, RequestValidators } from "../types/RequestValidators";
 import { SpecFileContent } from "../types/SpecFileContent";
 import { RequestParameter } from "../types/RequestParameter";
+import {
+  Authorizer,
+  AuthorizerTypeEnum,
+  AwsAuthorizerScheme,
+  SecurityScheme,
+} from "../types/AwsAuthorizerSheme";
 
 export class OpenApiSpec {
   private openApi: string = "3.0.1";
   private paths: Record<string, PathItem> = {};
-  private components: any = {};
-  private securitySchemes: any = {};
+  private securitySchemes: SecurityScheme = {};
+  private security: Record<string, string[]>[] = [];
   private xAmazonApigatewayRequestValidators: RequestValidators = {
     [RequestValidationEnum.NONE]: {
       validateRequestBody: false,
@@ -34,10 +40,12 @@ export class OpenApiSpec {
     const specContent: SpecFileContent = {
       openapi: this.openApi,
       paths: this.paths,
-      components: this.components,
-      securitySchemes: this.securitySchemes,
+      components: {
+        securitySchemes: this.securitySchemes,
+      },
       "x-amazon-apigateway-request-validators": this.xAmazonApigatewayRequestValidators,
       "x-amazon-apigateway-request-validator": this.xAmazonApigatewayRequestValidator,
+      security: this.security,
     };
 
     return specContent;
@@ -98,6 +106,36 @@ export class OpenApiSpec {
         ),
       };
     }
+  }
+
+  public addSecuritySchemeAuthorizer({
+    securityName,
+    authorizerType,
+    authorizerUri,
+    authorizerResultsCacheTtlInSeconds,
+  }: AwsAuthorizerScheme): void {
+    const authorizer: Authorizer = {
+      type: "apiKey",
+      name: "Authorization",
+      in: "header",
+      "x-amazon-apigateway-authtype": "custom",
+      "x-amazon-apigateway-authorizer": {
+        type: authorizerType,
+        authorizerUri: authorizerUri ?? "${authorizer_lambda_arn}",
+        "x-amazon-apigateway-results-cache-ttl-in-seconds": authorizerResultsCacheTtlInSeconds ?? 0,
+      },
+    };
+
+    if (authorizerType === AuthorizerTypeEnum.TOKEN) {
+      authorizer["x-amazon-apigateway-authorizer"].identitySource =
+        "method.request.header.Authorization";
+    }
+
+    this.securitySchemes[securityName] = authorizer;
+
+    this.security.push({
+      [securityName]: [],
+    });
   }
 
   public addRoute({
