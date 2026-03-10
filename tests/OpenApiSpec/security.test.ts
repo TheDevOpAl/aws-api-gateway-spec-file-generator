@@ -81,101 +81,101 @@ describe("OpenApiSpec security", () => {
     const content = spec.getOpenApiSpecContent();
 
     expect(content).toEqual({
-      "openapi": "3.0.1",
-      "paths": {},
-      "components": {
-        "securitySchemes": {
-          "TokenAuthorizer": {
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header",
+      openapi: "3.0.1",
+      paths: {},
+      components: {
+        securitySchemes: {
+          TokenAuthorizer: {
+            type: "apiKey",
+            name: "Authorization",
+            in: "header",
             "x-amazon-apigateway-authtype": "custom",
             "x-amazon-apigateway-authorizer": {
-              "type": "token",
-              "authorizerUri": "arn:aws:lambda:us-east-1:123456789012:function:token-authorizer",
+              type: "token",
+              authorizerUri: "arn:aws:lambda:us-east-1:123456789012:function:token-authorizer",
               "x-amazon-apigateway-results-cache-ttl-in-seconds": 600,
-              "identitySource": "method.request.header.Authorization"
-            }
-          }
-        }
+              identitySource: "method.request.header.Authorization",
+            },
+          },
+        },
       },
       "x-amazon-apigateway-request-validators": {
-        "none": {
-          "validateRequestBody": false,
-          "validateRequestParameters": false
+        none: {
+          validateRequestBody: false,
+          validateRequestParameters: false,
         },
-        "strict": {
-          "validateRequestBody": true,
-          "validateRequestParameters": true
+        strict: {
+          validateRequestBody: true,
+          validateRequestParameters: true,
         },
         "request-body-only": {
-          "validateRequestBody": true,
-          "validateRequestParameters": false
+          validateRequestBody: true,
+          validateRequestParameters: false,
         },
         "request-parameter-only": {
-          "validateRequestBody": false,
-          "validateRequestParameters": true
-        }
+          validateRequestBody: false,
+          validateRequestParameters: true,
+        },
       },
       "x-amazon-apigateway-request-validator": "none",
-      "security": [
+      security: [
         {
-          "TokenAuthorizer": []
-        }
-      ]
-    })
-  })
+          TokenAuthorizer: [],
+        },
+      ],
+    });
+  });
 
   it("should template the authorizerUri if not provided AND test no seconds passed into ttl", () => {
     spec.addSecuritySchemeAuthorizer({
       securityName: "DefaultUriAuthorizer",
       authorizerType: AuthorizerTypeEnum.REQUEST,
     });
-    
+
     const content = spec.getOpenApiSpecContent();
 
     expect(content).toEqual({
-      "openapi": "3.0.1",
-      "paths": {},
-      "components": {
-        "securitySchemes": {
-          "DefaultUriAuthorizer": {
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header",
+      openapi: "3.0.1",
+      paths: {},
+      components: {
+        securitySchemes: {
+          DefaultUriAuthorizer: {
+            type: "apiKey",
+            name: "Authorization",
+            in: "header",
             "x-amazon-apigateway-authtype": "custom",
             "x-amazon-apigateway-authorizer": {
-              "type": "request",
-              "authorizerUri": "${authorizer_lambda_arn}",
-              "x-amazon-apigateway-results-cache-ttl-in-seconds": 0
-            }
-          }
-        }
+              type: "request",
+              authorizerUri: "${authorizer_lambda_arn}",
+              "x-amazon-apigateway-results-cache-ttl-in-seconds": 0,
+            },
+          },
+        },
       },
       "x-amazon-apigateway-request-validators": {
-        "none": {
-          "validateRequestBody": false,
-          "validateRequestParameters": false
+        none: {
+          validateRequestBody: false,
+          validateRequestParameters: false,
         },
-        "strict": {
-          "validateRequestBody": true,
-          "validateRequestParameters": true
+        strict: {
+          validateRequestBody: true,
+          validateRequestParameters: true,
         },
         "request-body-only": {
-          "validateRequestBody": true,
-          "validateRequestParameters": false
+          validateRequestBody: true,
+          validateRequestParameters: false,
         },
         "request-parameter-only": {
-          "validateRequestBody": false,
-          "validateRequestParameters": true
-        }
+          validateRequestBody: false,
+          validateRequestParameters: true,
+        },
       },
       "x-amazon-apigateway-request-validator": "none",
-      "security": [
+      security: [
         {
-          "DefaultUriAuthorizer": []
-        }
-      ]
-    })
-    })
+          DefaultUriAuthorizer: [],
+        },
+      ],
+    });
+  });
 });
