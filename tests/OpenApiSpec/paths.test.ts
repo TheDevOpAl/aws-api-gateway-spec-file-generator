@@ -215,7 +215,16 @@ describe("OpenApiSpec paths", () => {
           },
         },
       },
-      info: "basic info",
+      info: {
+        title: "",
+        version: "",
+        description: "",
+        contact: {
+          name: "",
+          email: "",
+          url: "",
+        },
+      },
       components: {
         securitySchemes: {},
         schemas: {},
@@ -264,7 +273,16 @@ describe("OpenApiSpec paths", () => {
 
     expect(content).toEqual({
       openapi: "3.0.1",
-      info: "basic info",
+      info: {
+        title: "",
+        version: "",
+        description: "",
+        contact: {
+          name: "",
+          email: "",
+          url: "",
+        },
+      },
       paths: {
         "users/{userId}": {
           get: {

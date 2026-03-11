@@ -27,7 +27,16 @@ describe("OpenApiSpec security", () => {
     expect(content).toEqual({
       openapi: "3.0.1",
       paths: {},
-      info: "basic info",
+      info: {
+        title: "",
+        version: "",
+        description: "",
+        contact: {
+          name: "",
+          email: "",
+          url: "",
+        },
+      },
       components: {
         schemas: {},
         securitySchemes: {
@@ -84,7 +93,16 @@ describe("OpenApiSpec security", () => {
     expect(content).toEqual({
       openapi: "3.0.1",
       paths: {},
-      info: "basic info",
+      info: {
+        title: "",
+        version: "",
+        description: "",
+        contact: {
+          name: "",
+          email: "",
+          url: "",
+        },
+      },
       components: {
         schemas: {},
         securitySchemes: {
@@ -140,7 +158,16 @@ describe("OpenApiSpec security", () => {
     expect(content).toEqual({
       openapi: "3.0.1",
       paths: {},
-      info: "basic info",
+      info: {
+        title: "",
+        version: "",
+        description: "",
+        contact: {
+          name: "",
+          email: "",
+          url: "",
+        },
+      },
       components: {
         schemas: {},
         securitySchemes: {
