@@ -1,4 +1,5 @@
 import { SecurityScheme } from "./AwsAuthorizerSheme";
+import { InfoBlockOutput } from "./InfoBlock";
 import { PathItem } from "./PathItem";
 import { RequestValidationEnum, RequestValidators } from "./RequestValidators";
 import { Schemas } from "./Schemas";
@@ -6,7 +7,7 @@ import { Schemas } from "./Schemas";
 export type SpecFileContent = {
   openapi: string;
   paths: Record<string, PathItem>;
-  info: string;
+  info: InfoBlockOutput;
   components: {
     securitySchemes: SecurityScheme;
     schemas: Schemas;

@@ -12,12 +12,18 @@ import {
 } from "../types/AwsAuthorizerSheme";
 import { ZodJsonSchemaOmitted } from "../types/ZodJsonSchemaOmitted";
 import { Schemas } from "../types/Schemas";
+import { InfoBlockInput, InfoBlockOutput } from "../types/InfoBlock";
 
 export class OpenApiSpec {
   private openApi: string = "3.0.1";
   private paths: Record<string, PathItem> = {};
   private securitySchemes: SecurityScheme = {};
-  private info: string = "basic info";
+  private info: InfoBlockOutput = {
+    title: "",
+    version: "",
+    description: "",
+    contact: { url: "", name: "", email: "" },
+  };
   private security: Record<string, string[]>[] = [];
   private schemas: Schemas = {};
   private xAmazonApigatewayRequestValidators: RequestValidators = {
@@ -55,10 +61,6 @@ export class OpenApiSpec {
     };
 
     return specContent;
-  }
-
-  public setRouteInfo(info: string): void {
-    this.info = info;
   }
 
   public setGlobalRequestValidator(requestValidator: RequestValidationEnum): void {
@@ -179,6 +181,26 @@ export class OpenApiSpec {
     const rest = this.getSchemaObject(schema);
 
     this.schemas[schemaName] = rest;
+  }
+
+  public setInfoBlock({
+    title,
+    description,
+    version,
+    contactName,
+    contactEmail,
+    contactUrl,
+  }: InfoBlockInput): void {
+    this.info = {
+      title,
+      description,
+      version,
+      contact: {
+        name: contactName,
+        email: contactEmail,
+        url: contactUrl,
+      },
+    };
   }
 
   public addRoute({
