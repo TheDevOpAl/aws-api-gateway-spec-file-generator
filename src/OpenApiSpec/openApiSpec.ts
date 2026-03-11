@@ -8,6 +8,7 @@ import { Authorizer, AwsAuthorizerScheme, SecurityScheme } from "../types/AwsAut
 import { ZodJsonSchemaOmitted } from "../types/ZodJsonSchemaOmitted";
 import { Schemas } from "../types/Schemas";
 import { InfoBlockInput, InfoBlockOutput } from "../types/InfoBlock";
+import { HttpMethodUpperCase } from "../types/HttpMethod";
 
 export class OpenApiSpec {
   private openApi: string = "3.0.1";
@@ -142,6 +143,20 @@ export class OpenApiSpec {
     }
   }
 
+  private addGatewayIntegration(routeName: string, method: string) {
+    const methodUpper: HttpMethodUpperCase = method.toUpperCase() as HttpMethodUpperCase;
+
+    this.paths[routeName]![method as keyof PathItem] = {
+      ...this.paths[routeName]![method as keyof PathItem]!,
+      "x-amazon-apigateway-integration": {
+        type: "aws_proxy",
+        httpMethod: methodUpper,
+        uri: `\${${routeName}_${method}_invoke_arn}`,
+        payloadFormatVersion: "2.0",
+      },
+    };
+  }
+
   public addSecuritySchemeAuthorizer({
     securityName,
     authorizerType,
@@ -225,5 +240,7 @@ export class OpenApiSpec {
     this.addRequestBody({ routeName, method, requestBodySchema, requestBodyContentType });
 
     this.addRequestParameters(routeName, method, requestParameters);
+
+    this.addGatewayIntegration(routeName, method);
   }
 }
