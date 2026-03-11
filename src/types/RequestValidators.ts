@@ -3,16 +3,16 @@ type RequestValidatorObject = {
   validateRequestParameters: boolean;
 };
 
-export enum RequestValidationEnum {
-  NONE = "none",
-  STRICT = "strict",
-  REQUEST_BODY_VALIDATION_ONLY = "request-body-only",
-  REQUEST_PARAMETER_VALIDATION_ONLY = "request-parameter-only",
-}
+type none = "none";
+type strict = "strict";
+type requestBodyOnly = "request-body-only";
+type requestParameterOnly = "request-parameter-only";
+
+export type RequestValidationOptions = none | strict | requestBodyOnly | requestParameterOnly;
 
 export type RequestValidators = {
-  [RequestValidationEnum.NONE]: RequestValidatorObject;
-  [RequestValidationEnum.STRICT]: RequestValidatorObject;
-  [RequestValidationEnum.REQUEST_BODY_VALIDATION_ONLY]: RequestValidatorObject;
-  [RequestValidationEnum.REQUEST_PARAMETER_VALIDATION_ONLY]: RequestValidatorObject;
+  none: RequestValidatorObject;
+  strict: RequestValidatorObject;
+  "request-body-only": RequestValidatorObject;
+  "request-parameter-only": RequestValidatorObject;
 };

@@ -1,5 +1,4 @@
 import { OpenApiSpec } from "../../src";
-import { AuthorizerTypeEnum } from "../../src/types/AwsAuthorizerSheme";
 
 describe("OpenApiSpec security", () => {
   let spec: OpenApiSpec;
@@ -17,7 +16,7 @@ describe("OpenApiSpec security", () => {
   it("should allow adding a security scheme and update security", () => {
     spec.addSecuritySchemeAuthorizer({
       securityName: "MyAuthorizer",
-      authorizerType: AuthorizerTypeEnum.REQUEST,
+      authorizerType: "request",
       authorizerUri: "arn:aws:lambda:us-east-1:123456789012:function:my-authorizer",
       authorizerResultsCacheTtlInSeconds: 300,
     });
@@ -83,7 +82,7 @@ describe("OpenApiSpec security", () => {
   it("should test token authorizer type", () => {
     spec.addSecuritySchemeAuthorizer({
       securityName: "TokenAuthorizer",
-      authorizerType: AuthorizerTypeEnum.TOKEN,
+      authorizerType: "token",
       authorizerUri: "arn:aws:lambda:us-east-1:123456789012:function:token-authorizer",
       authorizerResultsCacheTtlInSeconds: 600,
     });
@@ -150,7 +149,7 @@ describe("OpenApiSpec security", () => {
   it("should template the authorizerUri if not provided AND test no seconds passed into ttl", () => {
     spec.addSecuritySchemeAuthorizer({
       securityName: "DefaultUriAuthorizer",
-      authorizerType: AuthorizerTypeEnum.REQUEST,
+      authorizerType: "request",
     });
 
     const content = spec.getOpenApiSpecContent();

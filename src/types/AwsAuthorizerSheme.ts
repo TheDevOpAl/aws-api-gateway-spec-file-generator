@@ -1,11 +1,8 @@
-export enum AuthorizerTypeEnum {
-  TOKEN = "token",
-  REQUEST = "request",
-}
+export type AuthorizerType = "token" | "request";
 
 export type AwsAuthorizerScheme = {
   securityName: string;
-  authorizerType: AuthorizerTypeEnum;
+  authorizerType: AuthorizerType;
   authorizerUri?: string;
   authorizerResultsCacheTtlInSeconds?: number;
 };
@@ -20,7 +17,7 @@ export type Authorizer = {
   in: string;
   "x-amazon-apigateway-authtype": string;
   "x-amazon-apigateway-authorizer": {
-    type: AuthorizerTypeEnum;
+    type: AuthorizerType;
     authorizerUri: string;
     identitySource?: string;
     "x-amazon-apigateway-results-cache-ttl-in-seconds": number;

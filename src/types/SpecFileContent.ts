@@ -1,7 +1,7 @@
 import { SecurityScheme } from "./AwsAuthorizerSheme";
 import { InfoBlockOutput } from "./InfoBlock";
 import { PathItem } from "./PathItem";
-import { RequestValidationEnum, RequestValidators } from "./RequestValidators";
+import { RequestValidationOptions, RequestValidators } from "./RequestValidators";
 import { Schemas } from "./Schemas";
 
 export type SpecFileContent = {
@@ -13,6 +13,6 @@ export type SpecFileContent = {
     schemas: Schemas;
   };
   "x-amazon-apigateway-request-validators"?: RequestValidators;
-  "x-amazon-apigateway-request-validator": RequestValidationEnum;
+  "x-amazon-apigateway-request-validator": RequestValidationOptions;
   security: Record<string, string[]>[];
 };

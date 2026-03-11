@@ -1,6 +1,6 @@
 import { HttpMethod } from "./HttpMethod";
-import { RequestValidationEnum } from "./RequestValidators";
 import { RouteRequestParameter } from "./RequestParameter";
+import { RequestValidationOptions } from "./RequestValidators";
 import { ZodJsonSchemaOmitted } from "./ZodJsonSchemaOmitted";
 
 type RequestBody = {
@@ -19,7 +19,7 @@ type RequestBody = {
 export type PathItem = {
   [key in HttpMethod]?: {
     summary: string;
-    "x-amazon-apigateway-request-validator"?: RequestValidationEnum;
+    "x-amazon-apigateway-request-validator"?: RequestValidationOptions;
     requestBody?: RequestBody;
     parameters?: RouteRequestParameter[];
   };

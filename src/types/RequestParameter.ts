@@ -2,10 +2,7 @@ import { z } from "zod";
 import { RefSchemaType } from "./RefSchemaType";
 import { ZodJsonSchemaOmitted } from "./ZodJsonSchemaOmitted";
 
-export enum RequestParameterType {
-  QUERY = "query",
-  PATH = "path",
-}
+export type RequestParameterType = "query" | "path";
 
 export type RequestParameter = {
   name: string;

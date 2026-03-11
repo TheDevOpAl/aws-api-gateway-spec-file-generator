@@ -1,15 +1,10 @@
 import { z } from "zod";
 import { AddRouteParams } from "../types/AddRouteParams";
 import { PathItem } from "../types/PathItem";
-import { RequestValidationEnum, RequestValidators } from "../types/RequestValidators";
+import { RequestValidationOptions, RequestValidators } from "../types/RequestValidators";
 import { SpecFileContent } from "../types/SpecFileContent";
 import { RequestParameter } from "../types/RequestParameter";
-import {
-  Authorizer,
-  AuthorizerTypeEnum,
-  AwsAuthorizerScheme,
-  SecurityScheme,
-} from "../types/AwsAuthorizerSheme";
+import { Authorizer, AwsAuthorizerScheme, SecurityScheme } from "../types/AwsAuthorizerSheme";
 import { ZodJsonSchemaOmitted } from "../types/ZodJsonSchemaOmitted";
 import { Schemas } from "../types/Schemas";
 import { InfoBlockInput, InfoBlockOutput } from "../types/InfoBlock";
@@ -27,24 +22,24 @@ export class OpenApiSpec {
   private security: Record<string, string[]>[] = [];
   private schemas: Schemas = {};
   private xAmazonApigatewayRequestValidators: RequestValidators = {
-    [RequestValidationEnum.NONE]: {
+    none: {
       validateRequestBody: false,
       validateRequestParameters: false,
     },
-    [RequestValidationEnum.STRICT]: {
+    strict: {
       validateRequestBody: true,
       validateRequestParameters: true,
     },
-    [RequestValidationEnum.REQUEST_BODY_VALIDATION_ONLY]: {
+    "request-body-only": {
       validateRequestBody: true,
       validateRequestParameters: false,
     },
-    [RequestValidationEnum.REQUEST_PARAMETER_VALIDATION_ONLY]: {
+    "request-parameter-only": {
       validateRequestBody: false,
       validateRequestParameters: true,
     },
   };
-  private xAmazonApigatewayRequestValidator: RequestValidationEnum = RequestValidationEnum.NONE;
+  private xAmazonApigatewayRequestValidator: RequestValidationOptions = "none";
 
   public getOpenApiSpecContent(): SpecFileContent {
     const specContent: SpecFileContent = {
@@ -63,7 +58,7 @@ export class OpenApiSpec {
     return specContent;
   }
 
-  public setGlobalRequestValidator(requestValidator: RequestValidationEnum): void {
+  public setGlobalRequestValidator(requestValidator: RequestValidationOptions): void {
     this.xAmazonApigatewayRequestValidator = requestValidator;
   }
 
@@ -74,7 +69,7 @@ export class OpenApiSpec {
   private addRequestValidator(
     routeName: string,
     method: string,
-    requestValidator?: RequestValidationEnum,
+    requestValidator?: RequestValidationOptions,
   ): void {
     if (requestValidator) {
       this.paths![routeName]![method as keyof PathItem] = {
@@ -165,7 +160,7 @@ export class OpenApiSpec {
       },
     };
 
-    if (authorizerType === AuthorizerTypeEnum.TOKEN) {
+    if (authorizerType === "token") {
       authorizer["x-amazon-apigateway-authorizer"].identitySource =
         "method.request.header.Authorization";
     }

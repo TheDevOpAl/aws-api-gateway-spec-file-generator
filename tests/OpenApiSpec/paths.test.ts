@@ -1,10 +1,5 @@
 import { z } from "zod";
-import {
-  OpenApiSpec,
-  AddRouteParams,
-  RequestValidationEnum,
-  RequestParameterType,
-} from "../../src/index";
+import { OpenApiSpec, AddRouteParams } from "../../src/index";
 
 describe("OpenApiSpec paths", () => {
   let spec: OpenApiSpec;
@@ -122,7 +117,7 @@ describe("OpenApiSpec paths", () => {
       routeName: "users/{userId}",
       method: "get",
       summary: "Get user by ID",
-      requestValidator: RequestValidationEnum.STRICT,
+      requestValidator: "strict",
     };
     spec.addRoute(path);
     const content = spec.getOpenApiSpecContent();
@@ -146,7 +141,7 @@ describe("OpenApiSpec paths", () => {
       routeName: "users/{userId}",
       method: "post",
       summary: "Create user",
-      requestValidator: RequestValidationEnum.STRICT,
+      requestValidator: "strict",
       requestBodySchema: myZodObj,
     };
     spec.addRoute(path);
@@ -188,7 +183,7 @@ describe("OpenApiSpec paths", () => {
       routeName: "users/{userId}",
       method: "post",
       summary: "Create user",
-      requestValidator: RequestValidationEnum.STRICT,
+      requestValidator: "strict",
       requestBodySchema: "MySchema",
     };
     spec.addRoute(path);
@@ -260,7 +255,7 @@ describe("OpenApiSpec paths", () => {
       requestParameters: [
         {
           name: "userId",
-          type: RequestParameterType.PATH,
+          type: "path",
           required: true,
           description: "The ID of the user",
           schema: z.uuid(),
