@@ -194,7 +194,6 @@ describe("OpenApiSpec paths", () => {
     spec.addRoute(path);
     const content = spec.getOpenApiSpecContent();
 
-    console.log(JSON.stringify(content, null, 2));
     expect(content).toEqual({
       openapi: "3.0.1",
       paths: {

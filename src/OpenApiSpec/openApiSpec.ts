@@ -175,6 +175,12 @@ export class OpenApiSpec {
     });
   }
 
+  public addSchema(schemaName: string, schema: z.ZodType): void {
+    const rest = this.getSchemaObject(schema);
+
+    this.schemas[schemaName] = rest;
+  }
+
   public addRoute({
     routeName,
     method,
