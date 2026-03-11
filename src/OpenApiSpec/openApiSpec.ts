@@ -10,6 +10,8 @@ import {
   AwsAuthorizerScheme,
   SecurityScheme,
 } from "../types/AwsAuthorizerSheme";
+import { ZodJsonSchemaOmitted } from "../types/ZodJsonSchemaOmitted";
+import { Schemas } from "../types/Schemas";
 
 export class OpenApiSpec {
   private openApi: string = "3.0.1";
@@ -17,6 +19,7 @@ export class OpenApiSpec {
   private securitySchemes: SecurityScheme = {};
   private info: string = "basic info";
   private security: Record<string, string[]>[] = [];
+  private schemas: Schemas = {};
   private xAmazonApigatewayRequestValidators: RequestValidators = {
     [RequestValidationEnum.NONE]: {
       validateRequestBody: false,
@@ -44,6 +47,7 @@ export class OpenApiSpec {
       info: this.info,
       components: {
         securitySchemes: this.securitySchemes,
+        schemas: this.schemas,
       },
       "x-amazon-apigateway-request-validators": this.xAmazonApigatewayRequestValidators,
       "x-amazon-apigateway-request-validator": this.xAmazonApigatewayRequestValidator,
@@ -78,6 +82,16 @@ export class OpenApiSpec {
     }
   }
 
+  private getSchemaObject(
+    requestBodySchema: z.ZodType | string,
+  ): ZodJsonSchemaOmitted | { $ref: string } {
+    if (requestBodySchema instanceof z.ZodType) {
+      const { $schema, ...rest } = z.toJSONSchema(requestBodySchema);
+      return rest;
+    }
+    return { $ref: `#/components/schemas/${requestBodySchema}` };
+  }
+
   private addRequestBody({
     routeName,
     method,
@@ -86,11 +100,11 @@ export class OpenApiSpec {
   }: {
     routeName: string;
     method: string;
-    requestBodySchema?: z.ZodObject;
+    requestBodySchema?: z.ZodObject | string;
     requestBodyContentType: string;
   }): void {
     if (requestBodySchema) {
-      const { $schema, ...rest } = z.toJSONSchema(requestBodySchema);
+      const rest = this.getSchemaObject(requestBodySchema);
 
       this.paths![routeName]![method as keyof PathItem] = {
         ...this.paths[routeName]![method as keyof PathItem]!,
@@ -116,7 +130,7 @@ export class OpenApiSpec {
         ...this.paths[routeName]![method as keyof PathItem]!,
         parameters: requestParameters.map(
           ({ name, type, required = false, description, schema }) => {
-            const { $schema, ...rest } = z.toJSONSchema(schema);
+            const rest = this.getSchemaObject(schema);
 
             return {
               name,
