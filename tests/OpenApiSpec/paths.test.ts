@@ -21,7 +21,20 @@ describe("OpenApiSpec paths", () => {
     };
     spec.addRoute(path);
     const content = spec.getOpenApiSpecContent();
-    expect(content.paths).toEqual({ users: { get: { summary: "Get all users", responses: {} } } });
+    expect(content.paths).toEqual({
+      users: {
+        get: {
+          summary: "Get all users",
+          responses: {},
+          "x-amazon-apigateway-integration": {
+            httpMethod: "GET",
+            payloadFormatVersion: "2.0",
+            type: "aws_proxy",
+            uri: "${users_get_invoke_arn}",
+          },
+        },
+      },
+    });
   });
 
   it("should allow setting paths with a post request and get request", () => {
@@ -40,8 +53,26 @@ describe("OpenApiSpec paths", () => {
     const content = spec.getOpenApiSpecContent();
     expect(content.paths).toEqual({
       users: {
-        get: { summary: "Get all users", responses: {} },
-        post: { summary: "Create a post", responses: {} },
+        get: {
+          summary: "Get all users",
+          responses: {},
+          "x-amazon-apigateway-integration": {
+            httpMethod: "GET",
+            payloadFormatVersion: "2.0",
+            type: "aws_proxy",
+            uri: "${users_get_invoke_arn}",
+          },
+        },
+        post: {
+          summary: "Create a post",
+          responses: {},
+          "x-amazon-apigateway-integration": {
+            httpMethod: "POST",
+            payloadFormatVersion: "2.0",
+            type: "aws_proxy",
+            uri: "${users_post_invoke_arn}",
+          },
+        },
       },
     });
   });
@@ -61,8 +92,30 @@ describe("OpenApiSpec paths", () => {
     spec.addRoute(path2);
     const content = spec.getOpenApiSpecContent();
     expect(content.paths).toEqual({
-      users: { get: { summary: "Get all users", responses: {} } },
-      products: { post: { summary: "Create a product", responses: {} } },
+      users: {
+        get: {
+          summary: "Get all users",
+          responses: {},
+          "x-amazon-apigateway-integration": {
+            httpMethod: "GET",
+            payloadFormatVersion: "2.0",
+            type: "aws_proxy",
+            uri: "${users_get_invoke_arn}",
+          },
+        },
+      },
+      products: {
+        post: {
+          summary: "Create a product",
+          responses: {},
+          "x-amazon-apigateway-integration": {
+            httpMethod: "POST",
+            payloadFormatVersion: "2.0",
+            type: "aws_proxy",
+            uri: "${products_post_invoke_arn}",
+          },
+        },
+      },
     });
   });
 
@@ -95,7 +148,7 @@ describe("OpenApiSpec paths", () => {
     const path3: AddRouteParams = {
       routeName: "users",
       method: "post",
-      summary: "Get user by ID again",
+      summary: "Create a new User",
     };
 
     spec.addRoute(path);
@@ -105,10 +158,39 @@ describe("OpenApiSpec paths", () => {
     const content = spec.getOpenApiSpecContent();
     expect(content.paths).toEqual({
       "users/{userId}": {
-        get: { summary: "Get user by ID", responses: {} },
-        post: { summary: "Create a user by ID", responses: {} },
+        get: {
+          summary: "Get user by ID",
+          responses: {},
+          "x-amazon-apigateway-integration": {
+            httpMethod: "GET",
+            payloadFormatVersion: "2.0",
+            type: "aws_proxy",
+            uri: "${users/{userId}_get_invoke_arn}",
+          },
+        },
+        post: {
+          summary: "Create a user by ID",
+          responses: {},
+          "x-amazon-apigateway-integration": {
+            httpMethod: "POST",
+            payloadFormatVersion: "2.0",
+            type: "aws_proxy",
+            uri: "${users/{userId}_post_invoke_arn}",
+          },
+        },
       },
-      users: { post: { summary: "Get user by ID again", responses: {} } },
+      users: {
+        post: {
+          summary: "Create a new User",
+          responses: {},
+          "x-amazon-apigateway-integration": {
+            httpMethod: "POST",
+            payloadFormatVersion: "2.0",
+            type: "aws_proxy",
+            uri: "${users_post_invoke_arn}",
+          },
+        },
+      },
     });
   });
 
@@ -125,6 +207,12 @@ describe("OpenApiSpec paths", () => {
       "users/{userId}": {
         get: {
           responses: {},
+          "x-amazon-apigateway-integration": {
+            httpMethod: "GET",
+            payloadFormatVersion: "2.0",
+            type: "aws_proxy",
+            uri: "${users/{userId}_get_invoke_arn}",
+          },
           summary: "Get user by ID",
           "x-amazon-apigateway-request-validator": "strict",
         },
@@ -153,6 +241,12 @@ describe("OpenApiSpec paths", () => {
           summary: "Create user",
           "x-amazon-apigateway-request-validator": "strict",
           responses: {},
+          "x-amazon-apigateway-integration": {
+            httpMethod: "POST",
+            payloadFormatVersion: "2.0",
+            type: "aws_proxy",
+            uri: "${users/{userId}_post_invoke_arn}",
+          },
           requestBody: {
             required: true,
             content: {
@@ -196,6 +290,12 @@ describe("OpenApiSpec paths", () => {
           post: {
             summary: "Create user",
             responses: {},
+            "x-amazon-apigateway-integration": {
+              httpMethod: "POST",
+              payloadFormatVersion: "2.0",
+              type: "aws_proxy",
+              uri: "${users/{userId}_post_invoke_arn}",
+            },
             "x-amazon-apigateway-request-validator": "strict",
             requestBody: {
               required: true,
@@ -283,6 +383,12 @@ describe("OpenApiSpec paths", () => {
           get: {
             summary: "Get user by ID",
             responses: {},
+            "x-amazon-apigateway-integration": {
+              httpMethod: "GET",
+              payloadFormatVersion: "2.0",
+              type: "aws_proxy",
+              uri: "${users/{userId}_get_invoke_arn}",
+            },
             parameters: [
               {
                 name: "userId",
