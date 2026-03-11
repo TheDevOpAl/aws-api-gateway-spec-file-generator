@@ -8,7 +8,7 @@ export type AddRouteParams = {
   method: HttpMethod;
   summary: string;
   requestValidator?: RequestValidationEnum;
-  requestBodySchema?: z.ZodObject;
+  requestBodySchema?: z.ZodObject | string;
   requestBodyContentType?: string;
   responses?: {};
   requestParameters?: RequestParameter[];

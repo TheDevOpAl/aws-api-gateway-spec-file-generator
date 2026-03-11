@@ -1,4 +1,3 @@
-import { SecurityScheme } from "./../../src/types/AwsAuthorizerSheme";
 import { z } from "zod";
 import {
   OpenApiSpec,
@@ -6,7 +5,6 @@ import {
   RequestValidationEnum,
   RequestParameterType,
 } from "../../src/index";
-import { info } from "node:console";
 
 describe("OpenApiSpec paths", () => {
   let spec: OpenApiSpec;
@@ -185,6 +183,67 @@ describe("OpenApiSpec paths", () => {
     });
   });
 
+  it("should add request paramaters if a string is provided", () => {
+    const path: AddRouteParams = {
+      routeName: "users/{userId}",
+      method: "post",
+      summary: "Create user",
+      requestValidator: RequestValidationEnum.STRICT,
+      requestBodySchema: "MySchema",
+    };
+    spec.addRoute(path);
+    const content = spec.getOpenApiSpecContent();
+
+    console.log(JSON.stringify(content, null, 2));
+    expect(content).toEqual({
+      openapi: "3.0.1",
+      paths: {
+        "users/{userId}": {
+          post: {
+            summary: "Create user",
+            responses: {},
+            "x-amazon-apigateway-request-validator": "strict",
+            requestBody: {
+              required: true,
+              content: {
+                "application/json": {
+                  schema: {
+                    $ref: "#/components/schemas/MySchema",
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      info: "basic info",
+      components: {
+        securitySchemes: {},
+        schemas: {},
+      },
+      "x-amazon-apigateway-request-validators": {
+        none: {
+          validateRequestBody: false,
+          validateRequestParameters: false,
+        },
+        strict: {
+          validateRequestBody: true,
+          validateRequestParameters: true,
+        },
+        "request-body-only": {
+          validateRequestBody: true,
+          validateRequestParameters: false,
+        },
+        "request-parameter-only": {
+          validateRequestBody: false,
+          validateRequestParameters: true,
+        },
+      },
+      "x-amazon-apigateway-request-validator": "none",
+      security: [],
+    });
+  });
+
   it("Should add request parameters to a route if provided", () => {
     const path: AddRouteParams = {
       routeName: "users/{userId}",
@@ -231,6 +290,7 @@ describe("OpenApiSpec paths", () => {
       },
       components: {
         securitySchemes: {},
+        schemas: {},
       },
       security: [],
       "x-amazon-apigateway-request-validators": {
