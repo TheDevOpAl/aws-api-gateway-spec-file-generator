@@ -3,6 +3,7 @@ import { RequestParameter } from "./RequestParameter";
 import { RequestValidationOptions } from "./RequestValidators";
 import { z } from "zod";
 import { _JSONSchema } from "zod/v4/core/json-schema.cjs";
+import { Security } from "./Security";
 
 export type AddRouteParams = {
   routeName: string;
@@ -13,4 +14,5 @@ export type AddRouteParams = {
   requestBodyContentType?: string;
   responses?: {};
   requestParameters?: RequestParameter[];
+  routeSecurity?: Security[];
 };

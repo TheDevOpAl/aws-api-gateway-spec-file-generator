@@ -22,6 +22,7 @@ export type PathItem = {
   [key in HttpMethod]?: {
     summary: string;
     "x-amazon-apigateway-request-validator"?: RequestValidationOptions;
+    security?: Record<string, string[]>[];
     "x-amazon-apigateway-integration": {
       httpMethod: HttpMethodUpperCase;
       payloadFormatVersion: "2.0";
