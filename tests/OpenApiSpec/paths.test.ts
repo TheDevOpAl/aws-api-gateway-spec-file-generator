@@ -434,4 +434,73 @@ describe("OpenApiSpec paths", () => {
       "x-amazon-apigateway-request-validator": "none",
     });
   });
+
+  it("should add route specific security", () => {
+    spec.addRoute({
+      routeName: "test",
+      method: "get",
+      summary: "test",
+      routeSecurity: [{ OAuth2: ["read:write"] }],
+    });
+
+    const content = spec.getOpenApiSpecContent();
+
+    expect(content).toEqual({
+      openapi: "3.0.1",
+      paths: {
+        test: {
+          get: {
+            summary: "test",
+            responses: {},
+            "x-amazon-apigateway-integration": {
+              type: "aws_proxy",
+              httpMethod: "GET",
+              uri: "${test_get_invoke_arn}",
+              payloadFormatVersion: "2.0",
+            },
+            security: [
+              {
+                OAuth2: ["read:write"],
+              },
+            ],
+          },
+        },
+      },
+      info: {
+        title: "",
+        version: "",
+        description: "",
+        contact: {
+          url: "",
+          name: "",
+          email: "",
+        },
+      },
+      servers: [],
+      components: {
+        securitySchemes: {},
+        schemas: {},
+      },
+      "x-amazon-apigateway-request-validators": {
+        none: {
+          validateRequestBody: false,
+          validateRequestParameters: false,
+        },
+        strict: {
+          validateRequestBody: true,
+          validateRequestParameters: true,
+        },
+        "request-body-only": {
+          validateRequestBody: true,
+          validateRequestParameters: false,
+        },
+        "request-parameter-only": {
+          validateRequestBody: false,
+          validateRequestParameters: true,
+        },
+      },
+      "x-amazon-apigateway-request-validator": "none",
+      security: [],
+    });
+  });
 });

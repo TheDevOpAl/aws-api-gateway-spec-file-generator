@@ -72,11 +72,7 @@ describe("OpenApiSpec security", () => {
         },
       },
       "x-amazon-apigateway-request-validator": "none",
-      security: [
-        {
-          MyAuthorizer: [],
-        },
-      ],
+      security: [],
     });
   });
 
@@ -140,11 +136,7 @@ describe("OpenApiSpec security", () => {
         },
       },
       "x-amazon-apigateway-request-validator": "none",
-      security: [
-        {
-          TokenAuthorizer: [],
-        },
-      ],
+      security: [],
     });
   });
 
@@ -205,11 +197,28 @@ describe("OpenApiSpec security", () => {
         },
       },
       "x-amazon-apigateway-request-validator": "none",
-      security: [
-        {
-          DefaultUriAuthorizer: [],
-        },
-      ],
+      security: [],
     });
+  });
+
+  it("should add global security", () => {
+    spec.addSecuritySchemeAuthorizer({
+      securityName: "OAuth2",
+      authorizerType: "token",
+    });
+
+    spec.setGlobalSecurity([
+      {
+        OAuth2: [],
+      },
+    ]);
+
+    const content = spec.getOpenApiSpecContent();
+
+    expect(content.security).toEqual([
+      {
+        OAuth2: [],
+      },
+    ]);
   });
 });

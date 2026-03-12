@@ -8,9 +8,10 @@ import { Authorizer, AwsAuthorizerScheme, SecurityScheme } from "../types/AwsAut
 import { ZodJsonSchemaOmitted } from "../types/ZodJsonSchemaOmitted";
 import { Schemas } from "../types/Schemas";
 import { InfoBlockInput, InfoBlockOutput } from "../types/InfoBlock";
-import { HttpMethodUpperCase } from "../types/HttpMethod";
+import { HttpMethod, HttpMethodUpperCase } from "../types/HttpMethod";
 import { Server } from "../types/Server";
 import { _JSONSchema } from "zod/v4/core/json-schema.cjs";
+import { Security } from "../types/Security";
 
 export class OpenApiSpec {
   private openApi: string = "3.0.1";
@@ -22,7 +23,7 @@ export class OpenApiSpec {
     description: "",
     contact: { url: "", name: "", email: "" },
   };
-  private security: Record<string, string[]>[] = [];
+  private security: Security[] = [];
   private schemas: Schemas = {};
   private xAmazonApigatewayRequestValidators: RequestValidators = {
     none: {
@@ -156,7 +157,7 @@ export class OpenApiSpec {
     }
   }
 
-  private addGatewayIntegration(routeName: string, method: string) {
+  private addGatewayIntegration(routeName: string, method: HttpMethod) {
     const methodUpper: HttpMethodUpperCase = method.toUpperCase() as HttpMethodUpperCase;
 
     this.paths[routeName]![method as keyof PathItem] = {
@@ -167,6 +168,19 @@ export class OpenApiSpec {
         uri: `\${${routeName}_${method}_invoke_arn}`,
         payloadFormatVersion: "2.0",
       },
+    };
+  }
+
+  private addRouteSecurity(
+    routeName: string,
+    method: HttpMethod,
+    security?: Record<string, string[]>[],
+  ) {
+    if (security?.length === 0) return;
+
+    this.paths[routeName]![method as keyof PathItem] = {
+      ...this.paths[routeName]![method as keyof PathItem]!,
+      security,
     };
   }
 
@@ -194,10 +208,10 @@ export class OpenApiSpec {
     }
 
     this.securitySchemes[securityName] = authorizer;
+  }
 
-    this.security.push({
-      [securityName]: [],
-    });
+  public setGlobalSecurity(security: Security[]) {
+    this.security = security;
   }
 
   public addSchema(schemaName: string, schema: z.ZodType | _JSONSchema): void {
@@ -235,6 +249,7 @@ export class OpenApiSpec {
     requestBodyContentType = "application/json",
     responses = {},
     requestParameters = [],
+    routeSecurity,
   }: AddRouteParams): void {
     if (this.paths[routeName]?.[method]) {
       throw new Error(`Method ${method} already exists for route ${routeName}`);
@@ -255,5 +270,7 @@ export class OpenApiSpec {
     this.addRequestParameters(routeName, method, requestParameters);
 
     this.addGatewayIntegration(routeName, method);
+
+    this.addRouteSecurity(routeName, method, routeSecurity);
   }
 }
