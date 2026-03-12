@@ -12,6 +12,7 @@ import { HttpMethod, HttpMethodUpperCase } from "../types/HttpMethod";
 import { Server } from "../types/Server";
 import { _JSONSchema } from "zod/v4/core/json-schema.cjs";
 import { Security } from "../types/Security";
+import { Prettify } from "../types/Prettify";
 
 export class OpenApiSpec {
   private openApi: string = "3.0.1";
@@ -68,11 +69,7 @@ export class OpenApiSpec {
     this.xAmazonApigatewayRequestValidator = requestValidator;
   }
 
-  public setOpenApiVersion(version: string): void {
-    this.openApi = version;
-  }
-
-  public setServers(servers: Server[]) {
+  public setServers(servers: Prettify<Server>[]) {
     this.servers = servers;
   }
 
@@ -189,7 +186,7 @@ export class OpenApiSpec {
     authorizerType,
     authorizerUri,
     authorizerResultsCacheTtlInSeconds,
-  }: AwsAuthorizerScheme): void {
+  }: Prettify<AwsAuthorizerScheme>): void {
     const authorizer: Authorizer = {
       type: "apiKey",
       name: "Authorization",
@@ -210,7 +207,7 @@ export class OpenApiSpec {
     this.securitySchemes[securityName] = authorizer;
   }
 
-  public setGlobalSecurity(security: Security[]) {
+  public setGlobalSecurity(security: Prettify<Security>[]) {
     this.security = security;
   }
 
@@ -227,7 +224,7 @@ export class OpenApiSpec {
     contactName,
     contactEmail,
     contactUrl,
-  }: InfoBlockInput): void {
+  }: Prettify<InfoBlockInput>): void {
     this.info = {
       title,
       description,
@@ -250,7 +247,7 @@ export class OpenApiSpec {
     responses = {},
     requestParameters = [],
     routeSecurity,
-  }: AddRouteParams): void {
+  }: Prettify<AddRouteParams>): void {
     if (this.paths[routeName]?.[method]) {
       throw new Error(`Method ${method} already exists for route ${routeName}`);
     }
