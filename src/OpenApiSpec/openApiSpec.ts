@@ -9,6 +9,7 @@ import { ZodJsonSchemaOmitted } from "../types/ZodJsonSchemaOmitted";
 import { Schemas } from "../types/Schemas";
 import { InfoBlockInput, InfoBlockOutput } from "../types/InfoBlock";
 import { HttpMethodUpperCase } from "../types/HttpMethod";
+import { Server } from "../types/Server";
 
 export class OpenApiSpec {
   private openApi: string = "3.0.1";
@@ -41,12 +42,14 @@ export class OpenApiSpec {
     },
   };
   private xAmazonApigatewayRequestValidator: RequestValidationOptions = "none";
+  private servers: Server[] = [];
 
   public getOpenApiSpecContent(): SpecFileContent {
     const specContent: SpecFileContent = {
       openapi: this.openApi,
       paths: this.paths,
       info: this.info,
+      servers: this.servers,
       components: {
         securitySchemes: this.securitySchemes,
         schemas: this.schemas,
@@ -65,6 +68,10 @@ export class OpenApiSpec {
 
   public setOpenApiVersion(version: string): void {
     this.openApi = version;
+  }
+
+  public setServers(servers: Server[]) {
+    this.servers = servers;
   }
 
   private addRequestValidator(

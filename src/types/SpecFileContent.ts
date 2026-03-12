@@ -3,6 +3,7 @@ import { InfoBlockOutput } from "./InfoBlock";
 import { PathItem } from "./PathItem";
 import { RequestValidationOptions, RequestValidators } from "./RequestValidators";
 import { Schemas } from "./Schemas";
+import { Server } from "./Server";
 
 export type SpecFileContent = {
   openapi: string;
@@ -15,4 +16,5 @@ export type SpecFileContent = {
   "x-amazon-apigateway-request-validators"?: RequestValidators;
   "x-amazon-apigateway-request-validator": RequestValidationOptions;
   security: Record<string, string[]>[];
+  servers: Server[];
 };
