@@ -285,6 +285,7 @@ describe("OpenApiSpec paths", () => {
 
     expect(content).toEqual({
       openapi: "3.0.1",
+      servers: [],
       paths: {
         "users/{userId}": {
           post: {
@@ -368,6 +369,7 @@ describe("OpenApiSpec paths", () => {
 
     expect(content).toEqual({
       openapi: "3.0.1",
+      servers: [],
       info: {
         title: "",
         version: "",

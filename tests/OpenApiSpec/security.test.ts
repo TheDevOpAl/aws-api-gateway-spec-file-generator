@@ -26,6 +26,7 @@ describe("OpenApiSpec security", () => {
     expect(content).toEqual({
       openapi: "3.0.1",
       paths: {},
+      servers: [],
       info: {
         title: "",
         version: "",
@@ -92,6 +93,7 @@ describe("OpenApiSpec security", () => {
     expect(content).toEqual({
       openapi: "3.0.1",
       paths: {},
+      servers: [],
       info: {
         title: "",
         version: "",
@@ -157,6 +159,7 @@ describe("OpenApiSpec security", () => {
     expect(content).toEqual({
       openapi: "3.0.1",
       paths: {},
+      servers: [],
       info: {
         title: "",
         version: "",
