@@ -1,3 +1,4 @@
+import { _JSONSchema } from "zod/v4/core/json-schema.cjs";
 import { HttpMethod, HttpMethodUpperCase } from "./HttpMethod";
 import { RouteRequestParameter } from "./RequestParameter";
 import { RequestValidationOptions } from "./RequestValidators";
@@ -11,7 +12,8 @@ type RequestBody = {
         | ZodJsonSchemaOmitted
         | {
             $ref: string;
-          };
+          }
+        | _JSONSchema;
     };
   };
 };

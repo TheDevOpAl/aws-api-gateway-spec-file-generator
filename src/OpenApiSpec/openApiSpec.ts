@@ -10,6 +10,7 @@ import { Schemas } from "../types/Schemas";
 import { InfoBlockInput, InfoBlockOutput } from "../types/InfoBlock";
 import { HttpMethodUpperCase } from "../types/HttpMethod";
 import { Server } from "../types/Server";
+import { _JSONSchema } from "zod/v4/core/json-schema.cjs";
 
 export class OpenApiSpec {
   private openApi: string = "3.0.1";
@@ -88,13 +89,18 @@ export class OpenApiSpec {
   }
 
   private getSchemaObject(
-    requestBodySchema: z.ZodType | string,
-  ): ZodJsonSchemaOmitted | { $ref: string } {
+    requestBodySchema: z.ZodType | string | _JSONSchema,
+  ): ZodJsonSchemaOmitted | { $ref: string } | _JSONSchema {
     if (requestBodySchema instanceof z.ZodType) {
       const { $schema, ...rest } = z.toJSONSchema(requestBodySchema);
       return rest;
     }
-    return { $ref: `#/components/schemas/${requestBodySchema}` };
+
+    if (typeof requestBodySchema === "string") {
+      return { $ref: `#/components/schemas/${requestBodySchema}` };
+    }
+
+    return requestBodySchema;
   }
 
   private addRequestBody({
@@ -105,7 +111,7 @@ export class OpenApiSpec {
   }: {
     routeName: string;
     method: string;
-    requestBodySchema?: z.ZodObject | string;
+    requestBodySchema?: z.ZodObject | string | _JSONSchema;
     requestBodyContentType: string;
   }): void {
     if (requestBodySchema) {
@@ -194,7 +200,7 @@ export class OpenApiSpec {
     });
   }
 
-  public addSchema(schemaName: string, schema: z.ZodType): void {
+  public addSchema(schemaName: string, schema: z.ZodType | _JSONSchema): void {
     const rest = this.getSchemaObject(schema);
 
     this.schemas[schemaName] = rest;

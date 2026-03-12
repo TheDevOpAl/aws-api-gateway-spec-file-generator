@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { RefSchemaType } from "./RefSchemaType";
 import { ZodJsonSchemaOmitted } from "./ZodJsonSchemaOmitted";
+import { _JSONSchema } from "zod/v4/core/json-schema.cjs";
 
 export type RequestParameterType = "query" | "path";
 
@@ -9,7 +10,7 @@ export type RequestParameter = {
   type: RequestParameterType;
   required?: boolean;
   description: string;
-  schema: z.ZodType | string;
+  schema: z.ZodType | string | _JSONSchema;
 };
 
 export type RouteRequestParameter = {
@@ -17,5 +18,5 @@ export type RouteRequestParameter = {
   in: RequestParameterType;
   required?: boolean;
   description: string;
-  schema: ZodJsonSchemaOmitted | RefSchemaType;
+  schema: ZodJsonSchemaOmitted | RefSchemaType | _JSONSchema;
 };
