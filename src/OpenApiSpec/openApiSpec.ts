@@ -14,6 +14,7 @@ import { _JSONSchema } from "zod/v4/core/json-schema.cjs";
 import { Security } from "../types/Security";
 import { Prettify } from "../types/Prettify";
 import { RequestInfo } from "../types/RequestInfo";
+import { ResponseInfo } from "../types/ResponseInfo";
 
 export class OpenApiSpec {
   private openApi: string = "3.0.1";
@@ -102,6 +103,34 @@ export class OpenApiSpec {
     return requestBodySchema;
   }
 
+  private addResponseInfo({
+    routeName,
+    method,
+    responseInfo,
+  }: {
+    routeName: string;
+    method: HttpMethod;
+    responseInfo: ResponseInfo;
+  }): void {
+    const { contentSchema, contentType, happyPathStatusCode, description } = responseInfo;
+
+    const rest = this.getSchemaObject(contentSchema);
+
+    this.paths![routeName]![method as keyof PathItem] = {
+      ...this.paths[routeName]![method as keyof PathItem]!,
+      responses: {
+        [`${happyPathStatusCode}`]: {
+          description,
+          content: {
+            [contentType]: {
+              schema: rest,
+            },
+          },
+        },
+      },
+    };
+  }
+
   private addRequestBody({
     routeName,
     method,
@@ -109,7 +138,7 @@ export class OpenApiSpec {
     requestBodyContentType,
   }: {
     routeName: string;
-    method: string;
+    method: HttpMethod;
     requestBodySchema?: z.ZodObject | string | _JSONSchema;
     requestBodyContentType: string;
   }): void {
@@ -132,25 +161,23 @@ export class OpenApiSpec {
 
   private addRequestParameters(
     routeName: string,
-    method: string,
+    method: HttpMethod,
     requestParameters: RequestParameter[],
   ): void {
     if (requestParameters.length > 0) {
       this.paths![routeName]![method as keyof PathItem] = {
         ...this.paths[routeName]![method as keyof PathItem]!,
-        parameters: requestParameters.map(
-          ({ name, type, required = false, description, schema }) => {
-            const rest = this.getSchemaObject(schema);
+        parameters: requestParameters.map(({ name, type, description, schema }) => {
+          const rest = this.getSchemaObject(schema);
 
-            return {
-              name,
-              in: type,
-              required,
-              description,
-              schema: rest,
-            };
-          },
-        ),
+          return {
+            name,
+            in: type,
+            required: true,
+            description,
+            schema: rest,
+          };
+        }),
       };
     }
   }
@@ -239,7 +266,15 @@ export class OpenApiSpec {
   }
 
   public addRoute(routeInfo: Prettify<AddRouteParams>): void {
-    const { routeName, method, summary, requestInfo, responses = {}, routeSecurity } = routeInfo;
+    const {
+      routeName,
+      method,
+      summary,
+      requestInfo,
+      responseInfo,
+      responses = {},
+      routeSecurity,
+    } = routeInfo;
 
     const {
       requestValidator,
@@ -268,6 +303,8 @@ export class OpenApiSpec {
       requestBodySchema: contentSchema,
       requestBodyContentType: contentType,
     });
+
+    this.addResponseInfo({ routeName, method, responseInfo });
 
     this.addRequestParameters(routeName, method, requestParameters);
 

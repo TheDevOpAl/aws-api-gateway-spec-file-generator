@@ -4,17 +4,26 @@ import { RouteRequestParameter } from "./RequestParameter";
 import { RequestValidationOptions } from "./RequestValidators";
 import { ZodJsonSchemaOmitted } from "./ZodJsonSchemaOmitted";
 
+type Content = {
+  [key: string]: {
+    schema:
+      | ZodJsonSchemaOmitted
+      | {
+          $ref: string;
+        }
+      | _JSONSchema;
+  };
+};
+
 type RequestBody = {
   required: true;
-  content: {
-    [key: string]: {
-      schema:
-        | ZodJsonSchemaOmitted
-        | {
-            $ref: string;
-          }
-        | _JSONSchema;
-    };
+  content: Content;
+};
+
+type ResponseObject = {
+  [key: string]: {
+    description: string;
+    content: Content;
   };
 };
 
@@ -30,6 +39,7 @@ export type PathItem = {
       uri: string;
     };
     requestBody?: RequestBody;
+    responses: ResponseObject;
     parameters?: RouteRequestParameter[];
   };
 };

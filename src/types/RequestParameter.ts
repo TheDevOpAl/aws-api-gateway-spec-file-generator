@@ -8,7 +8,6 @@ export type RequestParameterType = "query" | "path";
 export type RequestParameter = {
   name: string;
   type: RequestParameterType;
-  required?: boolean;
   description: string;
   schema: z.ZodType | string | _JSONSchema;
 };
@@ -16,7 +15,7 @@ export type RequestParameter = {
 export type RouteRequestParameter = {
   name: string;
   in: RequestParameterType;
-  required?: boolean;
+  required: true;
   description: string;
   schema: ZodJsonSchemaOmitted | RefSchemaType | _JSONSchema;
 };
