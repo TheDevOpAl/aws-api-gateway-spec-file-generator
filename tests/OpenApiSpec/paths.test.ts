@@ -18,6 +18,7 @@ describe("OpenApiSpec paths", () => {
       routeName: "users",
       method: "get",
       summary: "Get all users",
+      requestInfo: {},
     };
     spec.addRoute(path);
     const content = spec.getOpenApiSpecContent();
@@ -42,11 +43,13 @@ describe("OpenApiSpec paths", () => {
       routeName: "users",
       method: "get",
       summary: "Get all users",
+      requestInfo: {},
     };
     const path2: AddRouteParams = {
       routeName: "users",
       method: "post",
       summary: "Create a post",
+      requestInfo: {},
     };
     spec.addRoute(path1);
     spec.addRoute(path2);
@@ -82,11 +85,13 @@ describe("OpenApiSpec paths", () => {
       routeName: "users",
       method: "get",
       summary: "Get all users",
+      requestInfo: {},
     };
     const path2: AddRouteParams = {
       routeName: "products",
       method: "post",
       summary: "Create a product",
+      requestInfo: {},
     };
     spec.addRoute(path1);
     spec.addRoute(path2);
@@ -124,11 +129,13 @@ describe("OpenApiSpec paths", () => {
       routeName: "users",
       method: "get",
       summary: "Get all users",
+      requestInfo: {},
     };
     const path2: AddRouteParams = {
       routeName: "users",
       method: "get",
       summary: "Get all users again",
+      requestInfo: {},
     };
     spec.addRoute(path1);
     expect(() => spec.addRoute(path2)).toThrow("Method get already exists for route users");
@@ -139,16 +146,19 @@ describe("OpenApiSpec paths", () => {
       routeName: "users/{userId}",
       method: "get",
       summary: "Get user by ID",
+      requestInfo: {},
     };
     const path2: AddRouteParams = {
       routeName: "users/{userId}",
       method: "post",
       summary: "Create a user by ID",
+      requestInfo: {},
     };
     const path3: AddRouteParams = {
       routeName: "users",
       method: "post",
       summary: "Create a new User",
+      requestInfo: {},
     };
 
     spec.addRoute(path);
@@ -199,7 +209,9 @@ describe("OpenApiSpec paths", () => {
       routeName: "users/{userId}",
       method: "get",
       summary: "Get user by ID",
-      requestValidator: "strict",
+      requestInfo: {
+        requestValidator: "strict",
+      },
     };
     spec.addRoute(path);
     const content = spec.getOpenApiSpecContent();
@@ -229,8 +241,10 @@ describe("OpenApiSpec paths", () => {
       routeName: "users/{userId}",
       method: "post",
       summary: "Create user",
-      requestValidator: "strict",
-      requestBodySchema: myZodObj,
+      requestInfo: {
+        requestValidator: "strict",
+        contentSchema: myZodObj,
+      },
     };
     spec.addRoute(path);
     const content = spec.getOpenApiSpecContent();
@@ -277,8 +291,10 @@ describe("OpenApiSpec paths", () => {
       routeName: "users/{userId}",
       method: "post",
       summary: "Create user",
-      requestValidator: "strict",
-      requestBodySchema: "MySchema",
+      requestInfo: {
+        requestValidator: "strict",
+        contentSchema: "MySchema",
+      },
     };
     spec.addRoute(path);
     const content = spec.getOpenApiSpecContent();
@@ -353,15 +369,17 @@ describe("OpenApiSpec paths", () => {
       routeName: "users/{userId}",
       method: "get",
       summary: "Get user by ID",
-      requestParameters: [
-        {
-          name: "userId",
-          type: "path",
-          required: true,
-          description: "The ID of the user",
-          schema: z.uuid(),
-        },
-      ],
+      requestInfo: {
+        requestParameters: [
+          {
+            name: "userId",
+            type: "path",
+            required: true,
+            description: "The ID of the user",
+            schema: z.uuid(),
+          },
+        ],
+      },
     };
 
     spec.addRoute(path);
@@ -441,6 +459,7 @@ describe("OpenApiSpec paths", () => {
       method: "get",
       summary: "test",
       routeSecurity: [{ OAuth2: ["read:write"] }],
+      requestInfo: {},
     });
 
     const content = spec.getOpenApiSpecContent();
