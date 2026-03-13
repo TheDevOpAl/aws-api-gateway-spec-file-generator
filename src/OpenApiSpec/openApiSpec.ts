@@ -197,7 +197,7 @@ export class OpenApiSpec {
   private addGatewayIntegration(routeName: string, method: HttpMethod) {
     const methodUpper: HttpMethodUpperCase = method.toUpperCase() as HttpMethodUpperCase;
 
-    const formatedRouteName = routeName.replace(/^\//, "").replace(/[{}]/g, "").replace(/\//g, "_")
+    const formatedRouteName = routeName.replace(/^\//, "").replace(/[{}]/g, "").replace(/\//g, "_");
 
     this.paths[routeName]![method as keyof PathItem] = {
       ...this.paths[routeName]![method as keyof PathItem]!,
