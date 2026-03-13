@@ -172,7 +172,7 @@ describe("OpenApiSpec security", () => {
             "x-amazon-apigateway-authtype": "custom",
             "x-amazon-apigateway-authorizer": {
               type: "request",
-              authorizerUri: "${authorizer_lambda_arn}",
+              authorizerUri: "${DefaultUriAuthorizer_lambda_invoke_arn}",
               "x-amazon-apigateway-results-cache-ttl-in-seconds": 0,
             },
           },

@@ -197,12 +197,14 @@ export class OpenApiSpec {
   private addGatewayIntegration(routeName: string, method: HttpMethod) {
     const methodUpper: HttpMethodUpperCase = method.toUpperCase() as HttpMethodUpperCase;
 
+    const formatedRouteName = routeName.replace(/^\//, "").replace(/[{}]/g, "").replace(/\//g, "_")
+
     this.paths[routeName]![method as keyof PathItem] = {
       ...this.paths[routeName]![method as keyof PathItem]!,
       "x-amazon-apigateway-integration": {
         type: "aws_proxy",
         httpMethod: methodUpper,
-        uri: `\${${routeName}_${method}_invoke_arn}`,
+        uri: `\${${formatedRouteName}_${method}_lambda_invoke_arn}`,
         payloadFormatVersion: "2.0",
       },
     };
@@ -234,7 +236,7 @@ export class OpenApiSpec {
       "x-amazon-apigateway-authtype": "custom",
       "x-amazon-apigateway-authorizer": {
         type: authorizerType,
-        authorizerUri: authorizerUri ?? "${authorizer_lambda_arn}",
+        authorizerUri: authorizerUri ?? `\${${securityName}_lambda_invoke_arn}`,
         "x-amazon-apigateway-results-cache-ttl-in-seconds": authorizerResultsCacheTtlInSeconds ?? 0,
       },
     };

@@ -56,7 +56,7 @@ describe("OpenApiSpec paths", () => {
           "x-amazon-apigateway-integration": {
             type: "aws_proxy",
             httpMethod: "GET",
-            uri: "${users_get_invoke_arn}",
+            uri: "${users_get_lambda_invoke_arn}",
             payloadFormatVersion: "2.0",
           },
         },
@@ -121,7 +121,7 @@ describe("OpenApiSpec paths", () => {
           "x-amazon-apigateway-integration": {
             type: "aws_proxy",
             httpMethod: "GET",
-            uri: "${users_get_invoke_arn}",
+            uri: "${users_get_lambda_invoke_arn}",
             payloadFormatVersion: "2.0",
           },
         },
@@ -149,7 +149,7 @@ describe("OpenApiSpec paths", () => {
           "x-amazon-apigateway-integration": {
             type: "aws_proxy",
             httpMethod: "POST",
-            uri: "${users_post_invoke_arn}",
+            uri: "${users_post_lambda_invoke_arn}",
             payloadFormatVersion: "2.0",
           },
         },
@@ -214,7 +214,7 @@ describe("OpenApiSpec paths", () => {
           "x-amazon-apigateway-integration": {
             type: "aws_proxy",
             httpMethod: "GET",
-            uri: "${users_get_invoke_arn}",
+            uri: "${users_get_lambda_invoke_arn}",
             payloadFormatVersion: "2.0",
           },
         },
@@ -244,7 +244,7 @@ describe("OpenApiSpec paths", () => {
           "x-amazon-apigateway-integration": {
             type: "aws_proxy",
             httpMethod: "POST",
-            uri: "${products_post_invoke_arn}",
+            uri: "${products_post_lambda_invoke_arn}",
             payloadFormatVersion: "2.0",
           },
         },
@@ -356,7 +356,7 @@ describe("OpenApiSpec paths", () => {
           "x-amazon-apigateway-integration": {
             type: "aws_proxy",
             httpMethod: "GET",
-            uri: "${users/{userId}_get_invoke_arn}",
+            uri: "${users_userId_get_lambda_invoke_arn}",
             payloadFormatVersion: "2.0",
           },
         },
@@ -384,7 +384,7 @@ describe("OpenApiSpec paths", () => {
           "x-amazon-apigateway-integration": {
             type: "aws_proxy",
             httpMethod: "POST",
-            uri: "${users/{userId}_post_invoke_arn}",
+            uri: "${users_userId_post_lambda_invoke_arn}",
             payloadFormatVersion: "2.0",
           },
         },
@@ -414,7 +414,7 @@ describe("OpenApiSpec paths", () => {
           "x-amazon-apigateway-integration": {
             type: "aws_proxy",
             httpMethod: "POST",
-            uri: "${users_post_invoke_arn}",
+            uri: "${users_post_lambda_invoke_arn}",
             payloadFormatVersion: "2.0",
           },
         },
@@ -468,7 +468,7 @@ describe("OpenApiSpec paths", () => {
           "x-amazon-apigateway-integration": {
             type: "aws_proxy",
             httpMethod: "GET",
-            uri: "${users/{userId}_get_invoke_arn}",
+            uri: "${users_userId_get_lambda_invoke_arn}",
             payloadFormatVersion: "2.0",
           },
         },
@@ -547,7 +547,7 @@ describe("OpenApiSpec paths", () => {
           "x-amazon-apigateway-integration": {
             type: "aws_proxy",
             httpMethod: "POST",
-            uri: "${users/{userId}_post_invoke_arn}",
+            uri: "${users_userId_post_lambda_invoke_arn}",
             payloadFormatVersion: "2.0",
           },
         },
@@ -612,7 +612,7 @@ describe("OpenApiSpec paths", () => {
           "x-amazon-apigateway-integration": {
             type: "aws_proxy",
             httpMethod: "POST",
-            uri: "${users/{userId}_post_invoke_arn}",
+            uri: "${users_userId_post_lambda_invoke_arn}",
             payloadFormatVersion: "2.0",
           },
         },
@@ -686,7 +686,7 @@ describe("OpenApiSpec paths", () => {
           "x-amazon-apigateway-integration": {
             type: "aws_proxy",
             httpMethod: "GET",
-            uri: "${users/{userId}_get_invoke_arn}",
+            uri: "${users_userId_get_lambda_invoke_arn}",
             payloadFormatVersion: "2.0",
           },
         },
@@ -738,7 +738,7 @@ describe("OpenApiSpec paths", () => {
           "x-amazon-apigateway-integration": {
             type: "aws_proxy",
             httpMethod: "GET",
-            uri: "${test_get_invoke_arn}",
+            uri: "${test_get_lambda_invoke_arn}",
             payloadFormatVersion: "2.0",
           },
           security: [
@@ -810,7 +810,7 @@ describe("OpenApiSpec paths", () => {
           "x-amazon-apigateway-integration": {
             type: "aws_proxy",
             httpMethod: "GET",
-            uri: "${test_get_invoke_arn}",
+            uri: "${test_get_lambda_invoke_arn}",
             payloadFormatVersion: "2.0",
           },
         },
