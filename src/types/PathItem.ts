@@ -17,13 +17,13 @@ type RequestBody = {
 };
 
 type WithContent = {
-      description: string;
-      content: Content;
-    }
+  description: string;
+  content: Content;
+};
 
-type WithoutContent = Omit<WithContent, "content">
+type WithoutContent = Omit<WithContent, "content">;
 
-export type ResponseObject = WithContent | WithoutContent ;
+export type ResponseObject = WithContent | WithoutContent;
 
 export type PathItem = {
   [key in HttpMethod]?: {

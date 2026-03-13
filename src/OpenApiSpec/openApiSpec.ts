@@ -131,7 +131,7 @@ export class OpenApiSpec {
 
     additionalStatusCodes.forEach((statusCode) => {
       const description = {
-        description: getReasonPhrase(statusCode)
+        description: getReasonPhrase(statusCode),
       };
 
       responses[`${statusCode}`] = description;
