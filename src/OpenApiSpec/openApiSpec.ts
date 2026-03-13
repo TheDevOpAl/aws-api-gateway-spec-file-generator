@@ -13,6 +13,7 @@ import { Server } from "../types/Server";
 import { _JSONSchema } from "zod/v4/core/json-schema.cjs";
 import { Security } from "../types/Security";
 import { Prettify } from "../types/Prettify";
+import { RequestInfo } from "../types/RequestInfo";
 
 export class OpenApiSpec {
   private openApi: string = "3.0.1";
@@ -237,17 +238,16 @@ export class OpenApiSpec {
     };
   }
 
-  public addRoute({
-    routeName,
-    method,
-    summary,
-    requestValidator,
-    requestBodySchema,
-    requestBodyContentType = "application/json",
-    responses = {},
-    requestParameters = [],
-    routeSecurity,
-  }: Prettify<AddRouteParams>): void {
+  public addRoute(routeInfo: Prettify<AddRouteParams>): void {
+    const { routeName, method, summary, requestInfo, responses = {}, routeSecurity } = routeInfo;
+
+    const {
+      requestValidator,
+      contentSchema,
+      contentType = "application/json",
+      requestParameters = [],
+    }: RequestInfo = requestInfo;
+
     if (this.paths[routeName]?.[method]) {
       throw new Error(`Method ${method} already exists for route ${routeName}`);
     }
@@ -262,7 +262,12 @@ export class OpenApiSpec {
 
     this.addRequestValidator(routeName, method, requestValidator);
 
-    this.addRequestBody({ routeName, method, requestBodySchema, requestBodyContentType });
+    this.addRequestBody({
+      routeName,
+      method,
+      requestBodySchema: contentSchema,
+      requestBodyContentType: contentType,
+    });
 
     this.addRequestParameters(routeName, method, requestParameters);
 
