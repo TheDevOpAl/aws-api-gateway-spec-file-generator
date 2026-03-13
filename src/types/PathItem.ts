@@ -3,15 +3,11 @@ import { HttpMethod, HttpMethodUpperCase } from "./HttpMethod";
 import { RouteRequestParameter } from "./RequestParameter";
 import { RequestValidationOptions } from "./RequestValidators";
 import { ZodJsonSchemaOmitted } from "./ZodJsonSchemaOmitted";
+import { RefSchemaType } from "./RefSchemaType";
 
 type Content = {
   [key: string]: {
-    schema:
-      | ZodJsonSchemaOmitted
-      | {
-          $ref: string;
-        }
-      | _JSONSchema;
+    schema: ZodJsonSchemaOmitted | RefSchemaType | _JSONSchema;
   };
 };
 
@@ -20,13 +16,12 @@ type RequestBody = {
   content: Content;
 };
 
-type ResponseObject = {
-  [key: string]: {
-    description: string;
-    content: Content;
-  };
-};
-
+export type ResponseObject =
+  | RefSchemaType
+  | {
+      description: string;
+      content: Content;
+    };
 export type PathItem = {
   [key in HttpMethod]?: {
     summary: string;
@@ -39,7 +34,7 @@ export type PathItem = {
       uri: string;
     };
     requestBody?: RequestBody;
-    responses: ResponseObject;
+    responses: Record<string, ResponseObject>;
     parameters?: RouteRequestParameter[];
   };
 };
