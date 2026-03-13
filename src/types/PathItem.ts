@@ -13,19 +13,19 @@ type Content = {
         }
       | _JSONSchema;
   };
-}
+};
 
 type RequestBody = {
   required: true;
-  content: Content
+  content: Content;
 };
 
 type ResponseObject = {
   [key: string]: {
     description: string;
     content: Content;
-  }
-}
+  };
+};
 
 export type PathItem = {
   [key in HttpMethod]?: {
@@ -39,7 +39,7 @@ export type PathItem = {
       uri: string;
     };
     requestBody?: RequestBody;
-    responses: ResponseObject
+    responses: ResponseObject;
     parameters?: RouteRequestParameter[];
   };
 };

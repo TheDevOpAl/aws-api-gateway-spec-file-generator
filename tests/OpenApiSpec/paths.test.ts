@@ -22,47 +22,45 @@ describe("OpenApiSpec paths", () => {
       responseInfo: {
         happyPathStatusCode: 200,
         description: "hello",
-        contentSchema: z.object({username: z.string()}),
-        contentType: "application/json"
-      }
+        contentSchema: z.object({ username: z.string() }),
+        contentType: "application/json",
+      },
     };
     spec.addRoute(path);
     const content = spec.getOpenApiSpecContent();
 
     expect(content.paths).toEqual({
-        "users": {
-          "get": {
-            "summary": "Get all users",
-            "responses": {
-              "200": {
-                "description": "hello",
-                "content": {
-                  "application/json": {
-                    "schema": {
-                      "type": "object",
-                      "properties": {
-                        "username": {
-                          "type": "string"
-                        }
+      users: {
+        get: {
+          summary: "Get all users",
+          responses: {
+            "200": {
+              description: "hello",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      username: {
+                        type: "string",
                       },
-                      "required": [
-                        "username"
-                      ],
-                      "additionalProperties": false
-                    }
-                  }
-                }
-              }
+                    },
+                    required: ["username"],
+                    additionalProperties: false,
+                  },
+                },
+              },
             },
-            "x-amazon-apigateway-integration": {
-              "type": "aws_proxy",
-              "httpMethod": "GET",
-              "uri": "${users_get_invoke_arn}",
-              "payloadFormatVersion": "2.0"
-            }
-          }
-        }
-      });
+          },
+          "x-amazon-apigateway-integration": {
+            type: "aws_proxy",
+            httpMethod: "GET",
+            uri: "${users_get_invoke_arn}",
+            payloadFormatVersion: "2.0",
+          },
+        },
+      },
+    });
   });
 
   it("should allow setting paths with a post request and get request", () => {
@@ -74,9 +72,9 @@ describe("OpenApiSpec paths", () => {
       responseInfo: {
         happyPathStatusCode: 200,
         description: "hello",
-        contentSchema: z.object({username: z.string()}),
-        contentType: "application/json"
-      }
+        contentSchema: z.object({ username: z.string() }),
+        contentType: "application/json",
+      },
     };
     const path2: AddRouteParams = {
       routeName: "users",
@@ -86,78 +84,74 @@ describe("OpenApiSpec paths", () => {
       responseInfo: {
         happyPathStatusCode: 200,
         description: "hello",
-        contentSchema: z.object({username: z.string()}),
-        contentType: "application/json"
-      }
+        contentSchema: z.object({ username: z.string() }),
+        contentType: "application/json",
+      },
     };
     spec.addRoute(path1);
     spec.addRoute(path2);
     const content = spec.getOpenApiSpecContent();
-    
+
     expect(content.paths).toEqual({
-        "users": {
-          "get": {
-            "summary": "Get all users",
-            "responses": {
-              "200": {
-                "description": "hello",
-                "content": {
-                  "application/json": {
-                    "schema": {
-                      "type": "object",
-                      "properties": {
-                        "username": {
-                          "type": "string"
-                        }
+      users: {
+        get: {
+          summary: "Get all users",
+          responses: {
+            "200": {
+              description: "hello",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      username: {
+                        type: "string",
                       },
-                      "required": [
-                        "username"
-                      ],
-                      "additionalProperties": false
-                    }
-                  }
-                }
-              }
+                    },
+                    required: ["username"],
+                    additionalProperties: false,
+                  },
+                },
+              },
             },
-            "x-amazon-apigateway-integration": {
-              "type": "aws_proxy",
-              "httpMethod": "GET",
-              "uri": "${users_get_invoke_arn}",
-              "payloadFormatVersion": "2.0"
-            }
           },
-          "post": {
-            "summary": "Create a post",
-            "responses": {
-              "200": {
-                "description": "hello",
-                "content": {
-                  "application/json": {
-                    "schema": {
-                      "type": "object",
-                      "properties": {
-                        "username": {
-                          "type": "string"
-                        }
+          "x-amazon-apigateway-integration": {
+            type: "aws_proxy",
+            httpMethod: "GET",
+            uri: "${users_get_invoke_arn}",
+            payloadFormatVersion: "2.0",
+          },
+        },
+        post: {
+          summary: "Create a post",
+          responses: {
+            "200": {
+              description: "hello",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      username: {
+                        type: "string",
                       },
-                      "required": [
-                        "username"
-                      ],
-                      "additionalProperties": false
-                    }
-                  }
-                }
-              }
+                    },
+                    required: ["username"],
+                    additionalProperties: false,
+                  },
+                },
+              },
             },
-            "x-amazon-apigateway-integration": {
-              "type": "aws_proxy",
-              "httpMethod": "POST",
-              "uri": "${users_post_invoke_arn}",
-              "payloadFormatVersion": "2.0"
-            }
-          }
-        }
-      });
+          },
+          "x-amazon-apigateway-integration": {
+            type: "aws_proxy",
+            httpMethod: "POST",
+            uri: "${users_post_invoke_arn}",
+            payloadFormatVersion: "2.0",
+          },
+        },
+      },
+    });
   });
 
   it("should allow setting paths with multiple routes", () => {
@@ -169,9 +163,9 @@ describe("OpenApiSpec paths", () => {
       responseInfo: {
         happyPathStatusCode: 200,
         description: "hello",
-        contentSchema: z.object({username: z.string()}),
-        contentType: "application/json"
-      }
+        contentSchema: z.object({ username: z.string() }),
+        contentType: "application/json",
+      },
     };
     const path2: AddRouteParams = {
       routeName: "products",
@@ -181,80 +175,76 @@ describe("OpenApiSpec paths", () => {
       responseInfo: {
         happyPathStatusCode: 200,
         description: "hello",
-        contentSchema: z.object({username: z.string()}),
-        contentType: "application/json"
-      }
+        contentSchema: z.object({ username: z.string() }),
+        contentType: "application/json",
+      },
     };
     spec.addRoute(path1);
     spec.addRoute(path2);
     const content = spec.getOpenApiSpecContent();
 
     expect(content.paths).toEqual({
-        "users": {
-          "get": {
-            "summary": "Get all users",
-            "responses": {
-              "200": {
-                "description": "hello",
-                "content": {
-                  "application/json": {
-                    "schema": {
-                      "type": "object",
-                      "properties": {
-                        "username": {
-                          "type": "string"
-                        }
+      users: {
+        get: {
+          summary: "Get all users",
+          responses: {
+            "200": {
+              description: "hello",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      username: {
+                        type: "string",
                       },
-                      "required": [
-                        "username"
-                      ],
-                      "additionalProperties": false
-                    }
-                  }
-                }
-              }
+                    },
+                    required: ["username"],
+                    additionalProperties: false,
+                  },
+                },
+              },
             },
-            "x-amazon-apigateway-integration": {
-              "type": "aws_proxy",
-              "httpMethod": "GET",
-              "uri": "${users_get_invoke_arn}",
-              "payloadFormatVersion": "2.0"
-            }
-          }
+          },
+          "x-amazon-apigateway-integration": {
+            type: "aws_proxy",
+            httpMethod: "GET",
+            uri: "${users_get_invoke_arn}",
+            payloadFormatVersion: "2.0",
+          },
         },
-        "products": {
-          "post": {
-            "summary": "Create a product",
-            "responses": {
-              "200": {
-                "description": "hello",
-                "content": {
-                  "application/json": {
-                    "schema": {
-                      "type": "object",
-                      "properties": {
-                        "username": {
-                          "type": "string"
-                        }
+      },
+      products: {
+        post: {
+          summary: "Create a product",
+          responses: {
+            "200": {
+              description: "hello",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      username: {
+                        type: "string",
                       },
-                      "required": [
-                        "username"
-                      ],
-                      "additionalProperties": false
-                    }
-                  }
-                }
-              }
+                    },
+                    required: ["username"],
+                    additionalProperties: false,
+                  },
+                },
+              },
             },
-            "x-amazon-apigateway-integration": {
-              "type": "aws_proxy",
-              "httpMethod": "POST",
-              "uri": "${products_post_invoke_arn}",
-              "payloadFormatVersion": "2.0"
-            }
-          }
-        }
-      });
+          },
+          "x-amazon-apigateway-integration": {
+            type: "aws_proxy",
+            httpMethod: "POST",
+            uri: "${products_post_invoke_arn}",
+            payloadFormatVersion: "2.0",
+          },
+        },
+      },
+    });
   });
 
   it("Throw error if method already exists for a route", () => {
@@ -266,9 +256,9 @@ describe("OpenApiSpec paths", () => {
       responseInfo: {
         happyPathStatusCode: 200,
         description: "hello",
-        contentSchema: z.object({username: z.string()}),
-        contentType: "application/json"
-      }
+        contentSchema: z.object({ username: z.string() }),
+        contentType: "application/json",
+      },
     };
     const path2: AddRouteParams = {
       routeName: "users",
@@ -278,9 +268,9 @@ describe("OpenApiSpec paths", () => {
       responseInfo: {
         happyPathStatusCode: 200,
         description: "hello",
-        contentSchema: z.object({username: z.string()}),
-        contentType: "application/json"
-      }
+        contentSchema: z.object({ username: z.string() }),
+        contentType: "application/json",
+      },
     };
     spec.addRoute(path1);
     expect(() => spec.addRoute(path2)).toThrow("Method get already exists for route users");
@@ -295,9 +285,9 @@ describe("OpenApiSpec paths", () => {
       responseInfo: {
         happyPathStatusCode: 200,
         description: "hello",
-        contentSchema: z.object({username: z.string()}),
-        contentType: "application/json"
-      }
+        contentSchema: z.object({ username: z.string() }),
+        contentType: "application/json",
+      },
     };
     const path2: AddRouteParams = {
       routeName: "users/{userId}",
@@ -307,9 +297,9 @@ describe("OpenApiSpec paths", () => {
       responseInfo: {
         happyPathStatusCode: 200,
         description: "hello",
-        contentSchema: z.object({username: z.string()}),
-        contentType: "application/json"
-      }
+        contentSchema: z.object({ username: z.string() }),
+        contentType: "application/json",
+      },
     };
     const path3: AddRouteParams = {
       routeName: "users",
@@ -319,9 +309,9 @@ describe("OpenApiSpec paths", () => {
       responseInfo: {
         happyPathStatusCode: 200,
         description: "hello",
-        contentSchema: z.object({username: z.string()}),
-        contentType: "application/json"
-      }
+        contentSchema: z.object({ username: z.string() }),
+        contentType: "application/json",
+      },
     };
 
     spec.addRoute(path);
@@ -332,99 +322,93 @@ describe("OpenApiSpec paths", () => {
 
     expect(content.paths).toEqual({
       "users/{userId}": {
-        "get": {
-          "summary": "Get user by ID",
-          "responses": {
+        get: {
+          summary: "Get user by ID",
+          responses: {
             "200": {
-              "description": "hello",
-              "content": {
+              description: "hello",
+              content: {
                 "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "username": {
-                        "type": "string"
-                      }
+                  schema: {
+                    type: "object",
+                    properties: {
+                      username: {
+                        type: "string",
+                      },
                     },
-                    "required": [
-                      "username"
-                    ],
-                    "additionalProperties": false
-                  }
-                }
-              }
-            }
+                    required: ["username"],
+                    additionalProperties: false,
+                  },
+                },
+              },
+            },
           },
           "x-amazon-apigateway-integration": {
-            "type": "aws_proxy",
-            "httpMethod": "GET",
-            "uri": "${users/{userId}_get_invoke_arn}",
-            "payloadFormatVersion": "2.0"
-          }
+            type: "aws_proxy",
+            httpMethod: "GET",
+            uri: "${users/{userId}_get_invoke_arn}",
+            payloadFormatVersion: "2.0",
+          },
         },
-        "post": {
-          "summary": "Create a user by ID",
-          "responses": {
+        post: {
+          summary: "Create a user by ID",
+          responses: {
             "200": {
-              "description": "hello",
-              "content": {
+              description: "hello",
+              content: {
                 "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "username": {
-                        "type": "string"
-                      }
+                  schema: {
+                    type: "object",
+                    properties: {
+                      username: {
+                        type: "string",
+                      },
                     },
-                    "required": [
-                      "username"
-                    ],
-                    "additionalProperties": false
-                  }
-                }
-              }
-            }
+                    required: ["username"],
+                    additionalProperties: false,
+                  },
+                },
+              },
+            },
           },
           "x-amazon-apigateway-integration": {
-            "type": "aws_proxy",
-            "httpMethod": "POST",
-            "uri": "${users/{userId}_post_invoke_arn}",
-            "payloadFormatVersion": "2.0"
-          }
-        }
+            type: "aws_proxy",
+            httpMethod: "POST",
+            uri: "${users/{userId}_post_invoke_arn}",
+            payloadFormatVersion: "2.0",
+          },
+        },
       },
-      "users": {
-        "post": {
-          "summary": "Create a new User",
-          "responses": {
+      users: {
+        post: {
+          summary: "Create a new User",
+          responses: {
             "200": {
-              "description": "hello",
-              "content": {
+              description: "hello",
+              content: {
                 "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "username": {
-                        "type": "string"
-                      }
+                  schema: {
+                    type: "object",
+                    properties: {
+                      username: {
+                        type: "string",
+                      },
                     },
-                    "required": [
-                      "username"
-                    ],
-                    "additionalProperties": false
-                  }
-                }
-              }
-            }
+                    required: ["username"],
+                    additionalProperties: false,
+                  },
+                },
+              },
+            },
           },
           "x-amazon-apigateway-integration": {
-            "type": "aws_proxy",
-            "httpMethod": "POST",
-            "uri": "${users_post_invoke_arn}",
-            "payloadFormatVersion": "2.0"
-          }
-        }
-      }
+            type: "aws_proxy",
+            httpMethod: "POST",
+            uri: "${users_post_invoke_arn}",
+            payloadFormatVersion: "2.0",
+          },
+        },
+      },
     });
   });
 
@@ -439,48 +423,46 @@ describe("OpenApiSpec paths", () => {
       responseInfo: {
         happyPathStatusCode: 200,
         description: "hello",
-        contentSchema: z.object({username: z.string()}),
-        contentType: "application/json"
-      }
+        contentSchema: z.object({ username: z.string() }),
+        contentType: "application/json",
+      },
     };
     spec.addRoute(path);
     const content = spec.getOpenApiSpecContent();
 
     expect(content.paths).toEqual({
-        "users/{userId}": {
-          "get": {
-            "summary": "Get user by ID",
-            "responses": {
-              "200": {
-                "description": "hello",
-                "content": {
-                  "application/json": {
-                    "schema": {
-                      "type": "object",
-                      "properties": {
-                        "username": {
-                          "type": "string"
-                        }
+      "users/{userId}": {
+        get: {
+          summary: "Get user by ID",
+          responses: {
+            "200": {
+              description: "hello",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      username: {
+                        type: "string",
                       },
-                      "required": [
-                        "username"
-                      ],
-                      "additionalProperties": false
-                    }
-                  }
-                }
-              }
+                    },
+                    required: ["username"],
+                    additionalProperties: false,
+                  },
+                },
+              },
             },
-            "x-amazon-apigateway-request-validator": "strict",
-            "x-amazon-apigateway-integration": {
-              "type": "aws_proxy",
-              "httpMethod": "GET",
-              "uri": "${users/{userId}_get_invoke_arn}",
-              "payloadFormatVersion": "2.0"
-            }
-          }
-        }
-      });
+          },
+          "x-amazon-apigateway-request-validator": "strict",
+          "x-amazon-apigateway-integration": {
+            type: "aws_proxy",
+            httpMethod: "GET",
+            uri: "${users/{userId}_get_invoke_arn}",
+            payloadFormatVersion: "2.0",
+          },
+        },
+      },
+    });
   });
 
   it("Should add a requestBody to a route if provided", () => {
@@ -499,70 +481,66 @@ describe("OpenApiSpec paths", () => {
       responseInfo: {
         happyPathStatusCode: 200,
         description: "hello",
-        contentSchema: z.object({username: z.string()}),
-        contentType: "application/json"
-      }
+        contentSchema: z.object({ username: z.string() }),
+        contentType: "application/json",
+      },
     };
     spec.addRoute(path);
     const content = spec.getOpenApiSpecContent();
 
     expect(content.paths).toEqual({
-        "users/{userId}": {
-          "post": {
-            "summary": "Create user",
-            "responses": {
-              "200": {
-                "description": "hello",
-                "content": {
-                  "application/json": {
-                    "schema": {
-                      "type": "object",
-                      "properties": {
-                        "username": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "username"
-                      ],
-                      "additionalProperties": false
-                    }
-                  }
-                }
-              }
-            },
-            "x-amazon-apigateway-request-validator": "strict",
-            "requestBody": {
-              "required": true,
-              "content": {
+      "users/{userId}": {
+        post: {
+          summary: "Create user",
+          responses: {
+            "200": {
+              description: "hello",
+              content: {
                 "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "name": {
-                        "type": "string"
+                  schema: {
+                    type: "object",
+                    properties: {
+                      username: {
+                        type: "string",
                       },
-                      "age": {
-                        "type": "number"
-                      }
                     },
-                    "required": [
-                      "name"
-                    ],
-                    "additionalProperties": false
-                  }
-                }
-              }
+                    required: ["username"],
+                    additionalProperties: false,
+                  },
+                },
+              },
             },
-            "x-amazon-apigateway-integration": {
-              "type": "aws_proxy",
-              "httpMethod": "POST",
-              "uri": "${users/{userId}_post_invoke_arn}",
-              "payloadFormatVersion": "2.0"
-            }
-          }
-        }
-      });
+          },
+          "x-amazon-apigateway-request-validator": "strict",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    name: {
+                      type: "string",
+                    },
+                    age: {
+                      type: "number",
+                    },
+                  },
+                  required: ["name"],
+                  additionalProperties: false,
+                },
+              },
+            },
+          },
+          "x-amazon-apigateway-integration": {
+            type: "aws_proxy",
+            httpMethod: "POST",
+            uri: "${users/{userId}_post_invoke_arn}",
+            payloadFormatVersion: "2.0",
+          },
+        },
+      },
+    });
   });
 
   it("should add request paramaters if a string is provided", () => {
@@ -577,60 +555,56 @@ describe("OpenApiSpec paths", () => {
       responseInfo: {
         happyPathStatusCode: 200,
         description: "hello",
-        contentSchema: z.object({username: z.string()}),
-        contentType: "application/json"
-      }
+        contentSchema: z.object({ username: z.string() }),
+        contentType: "application/json",
+      },
     };
     spec.addRoute(path);
     const content = spec.getOpenApiSpecContent();
 
-    
-
     expect(content.paths).toEqual({
-        "users/{userId}": {
-          "post": {
-            "summary": "Create user",
-            "responses": {
-              "200": {
-                "description": "hello",
-                "content": {
-                  "application/json": {
-                    "schema": {
-                      "type": "object",
-                      "properties": {
-                        "username": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "username"
-                      ],
-                      "additionalProperties": false
-                    }
-                  }
-                }
-              }
-            },
-            "x-amazon-apigateway-request-validator": "strict",
-            "requestBody": {
-              "required": true,
-              "content": {
+      "users/{userId}": {
+        post: {
+          summary: "Create user",
+          responses: {
+            "200": {
+              description: "hello",
+              content: {
                 "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/MySchema"
-                  }
-                }
-              }
+                  schema: {
+                    type: "object",
+                    properties: {
+                      username: {
+                        type: "string",
+                      },
+                    },
+                    required: ["username"],
+                    additionalProperties: false,
+                  },
+                },
+              },
             },
-            "x-amazon-apigateway-integration": {
-              "type": "aws_proxy",
-              "httpMethod": "POST",
-              "uri": "${users/{userId}_post_invoke_arn}",
-              "payloadFormatVersion": "2.0"
-            }
-          }
-        }
-      });
+          },
+          "x-amazon-apigateway-request-validator": "strict",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/MySchema",
+                },
+              },
+            },
+          },
+          "x-amazon-apigateway-integration": {
+            type: "aws_proxy",
+            httpMethod: "POST",
+            uri: "${users/{userId}_post_invoke_arn}",
+            payloadFormatVersion: "2.0",
+          },
+        },
+      },
+    });
   });
 
   it("Should add request parameters to a route if provided", () => {
@@ -651,60 +625,59 @@ describe("OpenApiSpec paths", () => {
       responseInfo: {
         happyPathStatusCode: 200,
         description: "hello",
-        contentSchema: z.object({username: z.string()}),
-        contentType: "application/json"
-      }
+        contentSchema: z.object({ username: z.string() }),
+        contentType: "application/json",
+      },
     };
 
     spec.addRoute(path);
     const content = spec.getOpenApiSpecContent();
     expect(content.paths).toEqual({
-        "users/{userId}": {
-          "get": {
-            "summary": "Get user by ID",
-            "responses": {
-              "200": {
-                "description": "hello",
-                "content": {
-                  "application/json": {
-                    "schema": {
-                      "type": "object",
-                      "properties": {
-                        "username": {
-                          "type": "string"
-                        }
+      "users/{userId}": {
+        get: {
+          summary: "Get user by ID",
+          responses: {
+            "200": {
+              description: "hello",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      username: {
+                        type: "string",
                       },
-                      "required": [
-                        "username"
-                      ],
-                      "additionalProperties": false
-                    }
-                  }
-                }
-              }
+                    },
+                    required: ["username"],
+                    additionalProperties: false,
+                  },
+                },
+              },
             },
-            "parameters": [
-              {
-                "name": "userId",
-                "in": "path",
-                "required": true,
-                "description": "The ID of the user",
-                "schema": {
-                  "type": "string",
-                  "format": "uuid",
-                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                }
-              }
-            ],
-            "x-amazon-apigateway-integration": {
-              "type": "aws_proxy",
-              "httpMethod": "GET",
-              "uri": "${users/{userId}_get_invoke_arn}",
-              "payloadFormatVersion": "2.0"
-            }
-          }
-        }
-      });
+          },
+          parameters: [
+            {
+              name: "userId",
+              in: "path",
+              required: true,
+              description: "The ID of the user",
+              schema: {
+                type: "string",
+                format: "uuid",
+                pattern:
+                  "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              },
+            },
+          ],
+          "x-amazon-apigateway-integration": {
+            type: "aws_proxy",
+            httpMethod: "GET",
+            uri: "${users/{userId}_get_invoke_arn}",
+            payloadFormatVersion: "2.0",
+          },
+        },
+      },
+    });
   });
 
   it("should add route specific security", () => {
@@ -717,53 +690,49 @@ describe("OpenApiSpec paths", () => {
       responseInfo: {
         happyPathStatusCode: 200,
         description: "hello",
-        contentSchema: z.object({username: z.string()}),
-        contentType: "application/json"
-      }
+        contentSchema: z.object({ username: z.string() }),
+        contentType: "application/json",
+      },
     });
 
     const content = spec.getOpenApiSpecContent();
 
     expect(content.paths).toEqual({
-        "test": {
-          "get": {
-            "summary": "test",
-            "responses": {
-              "200": {
-                "description": "hello",
-                "content": {
-                  "application/json": {
-                    "schema": {
-                      "type": "object",
-                      "properties": {
-                        "username": {
-                          "type": "string"
-                        }
+      test: {
+        get: {
+          summary: "test",
+          responses: {
+            "200": {
+              description: "hello",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      username: {
+                        type: "string",
                       },
-                      "required": [
-                        "username"
-                      ],
-                      "additionalProperties": false
-                    }
-                  }
-                }
-              }
+                    },
+                    required: ["username"],
+                    additionalProperties: false,
+                  },
+                },
+              },
             },
-            "x-amazon-apigateway-integration": {
-              "type": "aws_proxy",
-              "httpMethod": "GET",
-              "uri": "${test_get_invoke_arn}",
-              "payloadFormatVersion": "2.0"
+          },
+          "x-amazon-apigateway-integration": {
+            type: "aws_proxy",
+            httpMethod: "GET",
+            uri: "${test_get_invoke_arn}",
+            payloadFormatVersion: "2.0",
+          },
+          security: [
+            {
+              OAuth2: ["read:write"],
             },
-            "security": [
-              {
-                "OAuth2": [
-                  "read:write"
-                ]
-              }
-            ]
-          }
-        }
-      });
-  })
+          ],
+        },
+      },
+    });
+  });
 });
