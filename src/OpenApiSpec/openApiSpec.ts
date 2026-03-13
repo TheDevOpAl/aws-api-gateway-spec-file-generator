@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { AddRouteParams } from "../types/AddRouteParams";
-import { PathItem } from "../types/PathItem";
+import { PathItem, ResponseObject } from "../types/PathItem";
 import { RequestValidationOptions, RequestValidators } from "../types/RequestValidators";
 import { SpecFileContent } from "../types/SpecFileContent";
 import { RequestParameter } from "../types/RequestParameter";
@@ -112,22 +112,33 @@ export class OpenApiSpec {
     method: HttpMethod;
     responseInfo: ResponseInfo;
   }): void {
-    const { contentSchema, contentType, happyPathStatusCode, description } = responseInfo;
+    const { contentSchema, contentType, happyPathStatusCode, description, additionalStatusCodes } =
+      responseInfo;
 
     const rest = this.getSchemaObject(contentSchema);
 
-    this.paths![routeName]![method as keyof PathItem] = {
-      ...this.paths[routeName]![method as keyof PathItem]!,
-      responses: {
-        [`${happyPathStatusCode}`]: {
-          description,
-          content: {
-            [contentType]: {
-              schema: rest,
-            },
+    const responses: Record<string, ResponseObject> = {
+      [`${happyPathStatusCode}`]: {
+        description,
+        content: {
+          [contentType]: {
+            schema: rest,
           },
         },
       },
+    };
+
+    additionalStatusCodes.forEach((statusCode) => {
+      const ref = {
+        $ref: `#/components/responses/${statusCode}`,
+      };
+
+      responses[`${statusCode}`] = ref;
+    });
+
+    this.paths![routeName]![method as keyof PathItem] = {
+      ...this.paths[routeName]![method as keyof PathItem]!,
+      responses,
     };
   }
 

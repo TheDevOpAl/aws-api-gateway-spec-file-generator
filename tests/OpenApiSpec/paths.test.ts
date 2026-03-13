@@ -24,6 +24,7 @@ describe("OpenApiSpec paths", () => {
         description: "hello",
         contentSchema: z.object({ username: z.string() }),
         contentType: "application/json",
+        additionalStatusCodes: [],
       },
     };
     spec.addRoute(path);
@@ -74,6 +75,7 @@ describe("OpenApiSpec paths", () => {
         description: "hello",
         contentSchema: z.object({ username: z.string() }),
         contentType: "application/json",
+        additionalStatusCodes: [],
       },
     };
     const path2: AddRouteParams = {
@@ -86,6 +88,7 @@ describe("OpenApiSpec paths", () => {
         description: "hello",
         contentSchema: z.object({ username: z.string() }),
         contentType: "application/json",
+        additionalStatusCodes: [],
       },
     };
     spec.addRoute(path1);
@@ -165,6 +168,7 @@ describe("OpenApiSpec paths", () => {
         description: "hello",
         contentSchema: z.object({ username: z.string() }),
         contentType: "application/json",
+        additionalStatusCodes: [],
       },
     };
     const path2: AddRouteParams = {
@@ -177,6 +181,7 @@ describe("OpenApiSpec paths", () => {
         description: "hello",
         contentSchema: z.object({ username: z.string() }),
         contentType: "application/json",
+        additionalStatusCodes: [],
       },
     };
     spec.addRoute(path1);
@@ -258,6 +263,7 @@ describe("OpenApiSpec paths", () => {
         description: "hello",
         contentSchema: z.object({ username: z.string() }),
         contentType: "application/json",
+        additionalStatusCodes: [],
       },
     };
     const path2: AddRouteParams = {
@@ -270,6 +276,7 @@ describe("OpenApiSpec paths", () => {
         description: "hello",
         contentSchema: z.object({ username: z.string() }),
         contentType: "application/json",
+        additionalStatusCodes: [],
       },
     };
     spec.addRoute(path1);
@@ -287,6 +294,7 @@ describe("OpenApiSpec paths", () => {
         description: "hello",
         contentSchema: z.object({ username: z.string() }),
         contentType: "application/json",
+        additionalStatusCodes: [],
       },
     };
     const path2: AddRouteParams = {
@@ -299,6 +307,7 @@ describe("OpenApiSpec paths", () => {
         description: "hello",
         contentSchema: z.object({ username: z.string() }),
         contentType: "application/json",
+        additionalStatusCodes: [],
       },
     };
     const path3: AddRouteParams = {
@@ -311,6 +320,7 @@ describe("OpenApiSpec paths", () => {
         description: "hello",
         contentSchema: z.object({ username: z.string() }),
         contentType: "application/json",
+        additionalStatusCodes: [],
       },
     };
 
@@ -425,6 +435,7 @@ describe("OpenApiSpec paths", () => {
         description: "hello",
         contentSchema: z.object({ username: z.string() }),
         contentType: "application/json",
+        additionalStatusCodes: [],
       },
     };
     spec.addRoute(path);
@@ -483,6 +494,7 @@ describe("OpenApiSpec paths", () => {
         description: "hello",
         contentSchema: z.object({ username: z.string() }),
         contentType: "application/json",
+        additionalStatusCodes: [],
       },
     };
     spec.addRoute(path);
@@ -557,6 +569,7 @@ describe("OpenApiSpec paths", () => {
         description: "hello",
         contentSchema: z.object({ username: z.string() }),
         contentType: "application/json",
+        additionalStatusCodes: [],
       },
     };
     spec.addRoute(path);
@@ -627,6 +640,7 @@ describe("OpenApiSpec paths", () => {
         description: "hello",
         contentSchema: z.object({ username: z.string() }),
         contentType: "application/json",
+        additionalStatusCodes: [],
       },
     };
 
@@ -692,6 +706,7 @@ describe("OpenApiSpec paths", () => {
         description: "hello",
         contentSchema: z.object({ username: z.string() }),
         contentType: "application/json",
+        additionalStatusCodes: [],
       },
     });
 
@@ -718,6 +733,69 @@ describe("OpenApiSpec paths", () => {
                   },
                 },
               },
+            },
+          },
+          "x-amazon-apigateway-integration": {
+            type: "aws_proxy",
+            httpMethod: "GET",
+            uri: "${test_get_invoke_arn}",
+            payloadFormatVersion: "2.0",
+          },
+          security: [
+            {
+              OAuth2: ["read:write"],
+            },
+          ],
+        },
+      },
+    });
+  });
+
+  it("should add two addition status codes", () => {
+    spec.addRoute({
+      routeName: "test",
+      method: "get",
+      summary: "test",
+      routeSecurity: [{ OAuth2: ["read:write"] }],
+      requestInfo: {},
+      responseInfo: {
+        happyPathStatusCode: 200,
+        description: "hello",
+        contentSchema: z.object({ username: z.string() }),
+        contentType: "application/json",
+        additionalStatusCodes: [401, 403],
+      },
+    });
+
+    const content = spec.getOpenApiSpecContent();
+
+    expect(content.paths).toEqual({
+      test: {
+        get: {
+          summary: "test",
+          responses: {
+            "200": {
+              description: "hello",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      username: {
+                        type: "string",
+                      },
+                    },
+                    required: ["username"],
+                    additionalProperties: false,
+                  },
+                },
+              },
+            },
+            "401": {
+              $ref: "#/components/responses/401",
+            },
+            "403": {
+              $ref: "#/components/responses/403",
             },
           },
           "x-amazon-apigateway-integration": {
