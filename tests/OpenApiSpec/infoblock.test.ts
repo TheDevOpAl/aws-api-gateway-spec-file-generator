@@ -1,4 +1,4 @@
-import { OpenApiSpec } from "./../src/OpenApiSpec/openApiSpec";
+import { OpenApiSpec } from "../../src/OpenApiSpec/openApiSpec";
 describe("InfoBlock", () => {
   let spec: OpenApiSpec;
 

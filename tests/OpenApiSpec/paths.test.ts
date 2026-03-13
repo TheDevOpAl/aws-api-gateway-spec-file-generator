@@ -756,12 +756,21 @@ describe("OpenApiSpec paths", () => {
       routeName: "test",
       method: "get",
       summary: "test",
-      routeSecurity: [{ OAuth2: ["read:write"] }],
+      routeSecurity: [],
       requestInfo: {},
       responseInfo: {
         happyPathStatusCode: 200,
         description: "hello",
-        contentSchema: z.object({ username: z.string() }),
+        contentSchema: {
+                    type: "object",
+                    properties: {
+                      username: {
+                        type: "string",
+                      },
+                    },
+                    required: ["username"],
+                    additionalProperties: false,
+                  },
         contentType: "application/json",
         additionalStatusCodes: [401, 403],
       },
@@ -792,10 +801,10 @@ describe("OpenApiSpec paths", () => {
               },
             },
             "401": {
-              $ref: "#/components/responses/401",
+              description: "Unauthorized",
             },
             "403": {
-              $ref: "#/components/responses/403",
+              description: "Forbidden",
             },
           },
           "x-amazon-apigateway-integration": {
@@ -803,12 +812,7 @@ describe("OpenApiSpec paths", () => {
             httpMethod: "GET",
             uri: "${test_get_invoke_arn}",
             payloadFormatVersion: "2.0",
-          },
-          security: [
-            {
-              OAuth2: ["read:write"],
-            },
-          ],
+          }
         },
       },
     });
