@@ -16,12 +16,15 @@ type RequestBody = {
   content: Content;
 };
 
-export type ResponseObject =
-  | RefSchemaType
-  | {
-      description: string;
-      content: Content;
-    };
+type WithContent = {
+  description: string;
+  content: Content;
+};
+
+type WithoutContent = Omit<WithContent, "content">;
+
+export type ResponseObject = WithContent | WithoutContent;
+
 export type PathItem = {
   [key in HttpMethod]?: {
     summary: string;

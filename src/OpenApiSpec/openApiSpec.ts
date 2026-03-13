@@ -15,6 +15,7 @@ import { Security } from "../types/Security";
 import { Prettify } from "../types/Prettify";
 import { RequestInfo } from "../types/RequestInfo";
 import { ResponseInfo } from "../types/ResponseInfo";
+import { getReasonPhrase } from "http-status-codes";
 
 export class OpenApiSpec {
   private openApi: string = "3.0.1";
@@ -129,11 +130,11 @@ export class OpenApiSpec {
     };
 
     additionalStatusCodes.forEach((statusCode) => {
-      const ref = {
-        $ref: `#/components/responses/${statusCode}`,
+      const description = {
+        description: getReasonPhrase(statusCode),
       };
 
-      responses[`${statusCode}`] = ref;
+      responses[`${statusCode}`] = description;
     });
 
     this.paths![routeName]![method as keyof PathItem] = {
