@@ -528,6 +528,10 @@ export class OpenApiSpec {
       responses[`${statusCode}`] = description;
     });
 
+    responses["default"] = {
+      description: getReasonPhrase(happyPathStatusCode),
+    };
+
     this.paths![routeName]![method as keyof PathItem] = {
       ...this.paths[routeName]![method as keyof PathItem]!,
       responses,

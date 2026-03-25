@@ -12,7 +12,7 @@ npm install api-spec-generator zod
 
 **Peer dependencies:**
 
-- [`zod`](https://github.com/colinhacks/zod) — for schema definitions.  This also supplies the `_JSONSchema` type
+- [`zod`](https://github.com/colinhacks/zod) — for schema definitions. This also supplies the `_JSONSchema` type
 - [`http-status-codes`](https://www.npmjs.com/package/http-status-codes) — for auto-generated response descriptions
 
 ---
