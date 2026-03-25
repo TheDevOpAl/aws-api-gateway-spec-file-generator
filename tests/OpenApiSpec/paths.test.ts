@@ -52,6 +52,9 @@ describe("OpenApiSpec paths", () => {
                 },
               },
             },
+            default: {
+              description: "OK",
+            },
           },
           "x-amazon-apigateway-integration": {
             type: "aws_proxy",
@@ -117,6 +120,9 @@ describe("OpenApiSpec paths", () => {
                 },
               },
             },
+            default: {
+              description: "OK",
+            },
           },
           "x-amazon-apigateway-integration": {
             type: "aws_proxy",
@@ -144,6 +150,9 @@ describe("OpenApiSpec paths", () => {
                   },
                 },
               },
+            },
+            default: {
+              description: "OK",
             },
           },
           "x-amazon-apigateway-integration": {
@@ -210,6 +219,9 @@ describe("OpenApiSpec paths", () => {
                 },
               },
             },
+            default: {
+              description: "OK",
+            },
           },
           "x-amazon-apigateway-integration": {
             type: "aws_proxy",
@@ -239,6 +251,9 @@ describe("OpenApiSpec paths", () => {
                   },
                 },
               },
+            },
+            default: {
+              description: "OK",
             },
           },
           "x-amazon-apigateway-integration": {
@@ -352,6 +367,9 @@ describe("OpenApiSpec paths", () => {
                 },
               },
             },
+            default: {
+              description: "OK",
+            },
           },
           "x-amazon-apigateway-integration": {
             type: "aws_proxy",
@@ -379,6 +397,9 @@ describe("OpenApiSpec paths", () => {
                   },
                 },
               },
+            },
+            default: {
+              description: "OK",
             },
           },
           "x-amazon-apigateway-integration": {
@@ -409,6 +430,9 @@ describe("OpenApiSpec paths", () => {
                   },
                 },
               },
+            },
+            default: {
+              description: "OK",
             },
           },
           "x-amazon-apigateway-integration": {
@@ -462,6 +486,9 @@ describe("OpenApiSpec paths", () => {
                   },
                 },
               },
+            },
+            default: {
+              description: "OK",
             },
           },
           "x-amazon-apigateway-request-validator": "strict",
@@ -521,6 +548,9 @@ describe("OpenApiSpec paths", () => {
                   },
                 },
               },
+            },
+            default: {
+              description: "OK",
             },
           },
           "x-amazon-apigateway-request-validator": "strict",
@@ -597,6 +627,9 @@ describe("OpenApiSpec paths", () => {
                 },
               },
             },
+            default: {
+              description: "OK",
+            },
           },
           "x-amazon-apigateway-request-validator": "strict",
           requestBody: {
@@ -668,6 +701,9 @@ describe("OpenApiSpec paths", () => {
                 },
               },
             },
+            default: {
+              description: "OK",
+            },
           },
           parameters: [
             {
@@ -733,6 +769,9 @@ describe("OpenApiSpec paths", () => {
                   },
                 },
               },
+            },
+            default: {
+              description: "OK",
             },
           },
           "x-amazon-apigateway-integration": {
@@ -805,6 +844,9 @@ describe("OpenApiSpec paths", () => {
             },
             "403": {
               description: "Forbidden",
+            },
+            default: {
+              description: "OK",
             },
           },
           "x-amazon-apigateway-integration": {
