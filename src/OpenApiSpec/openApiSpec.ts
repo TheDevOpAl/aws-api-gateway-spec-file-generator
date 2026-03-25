@@ -17,6 +17,39 @@ import { RequestInfo } from "../types/RequestInfo";
 import { ResponseInfo } from "../types/ResponseInfo";
 import { getReasonPhrase } from "http-status-codes";
 
+/**
+ * Builds an OpenAPI 3.0.1 specification object for use with AWS API Gateway.
+ *
+ * Construct an instance, configure it using the public methods below, then call
+ * `getOpenApiSpecContent()` to retrieve the final spec object — which you can
+ * serialise to JSON/YAML and import directly into API Gateway.
+ *
+ * **Typical usage**
+ * ```ts
+ * const spec = new OpenApiSpec();
+ *
+ * spec.setInfoBlock({ title: "My API", version: "1.0.0", description: "..." });
+ * spec.setServers([{ url: "https://api.example.com" }]);
+ * spec.setGlobalRequestValidator("strict");
+ *
+ * spec.addSecuritySchemeAuthorizer({
+ *   securityName: "myAuthorizer",
+ *   authorizerType: "token",
+ *   authorizerUri: "arn:aws:...",
+ * });
+ * spec.setGlobalSecurity([{ myAuthorizer: [] }]);
+ *
+ * spec.addRoute({
+ *   routeName: "/users/{id}",
+ *   method: "get",
+ *   summary: "Fetch a user by ID",
+ *   requestInfo: { requestParameters: [{ name: "id", type: "path", description: "User ID", schema: z.string() }] },
+ *   responseInfo: { happyPathStatusCode: 200, description: "Success", contentType: "application/json", contentSchema: UserSchema, additionalStatusCodes: [404] },
+ * });
+ *
+ * const content = spec.getOpenApiSpecContent();
+ * ```
+ */
 export class OpenApiSpec {
   private openApi: string = "3.0.1";
   private paths: Record<string, PathItem> = {};
@@ -50,6 +83,27 @@ export class OpenApiSpec {
   private xAmazonApigatewayRequestValidator: RequestValidationOptions = "none";
   private servers: Server[] = [];
 
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Public API
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Returns the fully assembled OpenAPI spec object.
+   *
+   * Call this **after** all routes, schemas, security schemes, and metadata have
+   * been configured. The returned object can be serialised directly to JSON or
+   * YAML for import into AWS API Gateway.
+   *
+   * @returns {SpecFileContent} The complete OpenAPI 3.0.1 specification object,
+   *   including all paths, components, security definitions, and AWS-specific
+   *   extensions (`x-amazon-apigateway-*`).
+   *
+   * @example
+   * const spec = new OpenApiSpec();
+   * // ... configure spec ...
+   * const content = spec.getOpenApiSpecContent();
+   * fs.writeFileSync("api-spec.json", JSON.stringify(content, null, 2));
+   */
   public getOpenApiSpecContent(): SpecFileContent {
     const specContent: SpecFileContent = {
       openapi: this.openApi,
@@ -68,13 +122,350 @@ export class OpenApiSpec {
     return specContent;
   }
 
+  /**
+   * Sets the default AWS API Gateway request validator applied to **all** routes
+   * that do not specify their own validator.
+   *
+   * The validator controls whether API Gateway checks the request body, query/path
+   * parameters, or both before forwarding the request to the Lambda integration.
+   *
+   * | Value                    | Validates body | Validates params |
+   * |--------------------------|:--------------:|:----------------:|
+   * | `"none"` *(default)*     | ✗              | ✗                |
+   * | `"strict"`               | ✓              | ✓                |
+   * | `"request-body-only"`    | ✓              | ✗                |
+   * | `"request-parameter-only"` | ✗            | ✓                |
+   *
+   * @param {RequestValidationOptions} requestValidator - One of `"none"`,
+   *   `"strict"`, `"request-body-only"`, or `"request-parameter-only"`.
+   *
+   * @example
+   * spec.setGlobalRequestValidator("strict");
+   * // Every route now validates both body and parameters unless overridden.
+   */
   public setGlobalRequestValidator(requestValidator: RequestValidationOptions): void {
     this.xAmazonApigatewayRequestValidator = requestValidator;
   }
 
+  /**
+   * Defines the server base URLs listed in the OpenAPI spec.
+   *
+   * These appear under the top-level `servers` array and tell API clients where
+   * the API is hosted. For AWS API Gateway you typically supply the invoke URL
+   * for each stage you deploy to (e.g. dev, staging, prod).
+   *
+   * @param {Prettify<Server>[]} servers - An array of server objects. Each object
+   *   must include a `url` property and may optionally include a `description`.
+   *
+   * @example
+   * spec.setServers([
+   *   { url: "https://abc123.execute-api.us-east-1.amazonaws.com/prod", description: "Production" },
+   *   { url: "https://abc123.execute-api.us-east-1.amazonaws.com/dev",  description: "Development" },
+   * ]);
+   */
   public setServers(servers: Prettify<Server>[]) {
     this.servers = servers;
   }
+
+  /**
+   * Registers an AWS Lambda authorizer as a named security scheme.
+   *
+   * Once registered, the scheme can be referenced by name in `setGlobalSecurity()`
+   * or via the `routeSecurity` field on individual routes.
+   *
+   * AWS API Gateway supports two authorizer types:
+   * - **`"token"`** – expects a bearer token in the `Authorization` header.
+   * - **`"request"`** – can inspect headers, query strings, stage variables, etc.
+   *
+   * @param {Prettify<AwsAuthorizerScheme>} params
+   * @param {string}  params.securityName - The name used to reference this
+   *   authorizer in security requirements (e.g. `"myTokenAuthorizer"`).
+   * @param {"token" | "request"} params.authorizerType - The Lambda authorizer
+   *   type. Use `"token"` for simple bearer-token flows; `"request"` for more
+   *   complex inspection logic.
+   * @param {string}  [params.authorizerUri] - The full ARN of the authorizer
+   *   Lambda's invoke URL. If omitted, defaults to the Terraform/CDK template
+   *   variable `${securityName_lambda_invoke_arn}`.
+   * @param {number}  [params.authorizerResultsCacheTtlInSeconds=0] - How long
+   *   (in seconds) API Gateway caches a successful authorizer response. Set to
+   *   `0` to disable caching. Max value is `3600` (1 hour).
+   *
+   * @example
+   * spec.addSecuritySchemeAuthorizer({
+   *   securityName: "myTokenAuthorizer",
+   *   authorizerType: "token",
+   *   authorizerUri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:123456789012:function:MyAuthFunction/invocations",
+   *   authorizerResultsCacheTtlInSeconds: 300,
+   * });
+   *
+   * // Reference it globally:
+   * spec.setGlobalSecurity([{ myTokenAuthorizer: [] }]);
+   */
+  public addSecuritySchemeAuthorizer({
+    securityName,
+    authorizerType,
+    authorizerUri,
+    authorizerResultsCacheTtlInSeconds,
+  }: Prettify<AwsAuthorizerScheme>): void {
+    const authorizer: Authorizer = {
+      type: "apiKey",
+      name: "Authorization",
+      in: "header",
+      "x-amazon-apigateway-authtype": "custom",
+      "x-amazon-apigateway-authorizer": {
+        type: authorizerType,
+        authorizerUri: authorizerUri ?? `\${${securityName}_lambda_invoke_arn}`,
+        "x-amazon-apigateway-results-cache-ttl-in-seconds": authorizerResultsCacheTtlInSeconds ?? 0,
+      },
+    };
+
+    if (authorizerType === "token") {
+      authorizer["x-amazon-apigateway-authorizer"].identitySource =
+        "method.request.header.Authorization";
+    }
+
+    this.securitySchemes[securityName] = authorizer;
+  }
+
+  /**
+   * Sets the global security requirements applied to **every** route in the spec.
+   *
+   * Each element in the array is a security requirement object whose keys map to
+   * security scheme names registered via `addSecuritySchemeAuthorizer()`, and
+   * whose values are scope arrays (typically `[]` for Lambda authorizers).
+   *
+   * Individual routes can override this by passing `routeSecurity` to `addRoute()`.
+   *
+   * @param {Prettify<Security>[]} security - Array of security requirement objects.
+   *
+   * @example
+   * // Require the "myTokenAuthorizer" scheme on all routes by default:
+   * spec.setGlobalSecurity([{ myTokenAuthorizer: [] }]);
+   *
+   * // Multiple schemes (both must pass):
+   * spec.setGlobalSecurity([{ myTokenAuthorizer: [] }, { apiKeyAuth: [] }]);
+   */
+  public setGlobalSecurity(security: Prettify<Security>[]) {
+    this.security = security;
+  }
+
+  /**
+   * Registers a reusable schema in the `components/schemas` section of the spec.
+   *
+   * Registering a schema here allows you to reference it by name (as a `$ref`)
+   * anywhere a schema is accepted — e.g. in `requestInfo.contentSchema` or
+   * `responseInfo.contentSchema` — instead of inlining the full schema each time.
+   *
+   * @param {string} schemaName - The name under which the schema is stored.
+   *   Used as the `$ref` key: `#/components/schemas/<schemaName>`.
+   * @param {z.ZodType | _JSONSchema} schema - Either a Zod schema (automatically
+   *   converted to JSON Schema) or a raw JSON Schema object.
+   *
+   * @example
+   * // Register a Zod schema:
+   * const UserSchema = z.object({ id: z.string(), email: z.string().email() });
+   * spec.addSchema("User", UserSchema);
+   *
+   * // Reference it by name in a route:
+   * spec.addRoute({
+   *   ...
+   *   responseInfo: {
+   *     contentSchema: "User",   // ← string reference to #/components/schemas/User
+   *     ...
+   *   },
+   * });
+   */
+  public addSchema(schemaName: string, schema: z.ZodType | _JSONSchema): void {
+    const rest = this.getSchemaObject(schema);
+    this.schemas[schemaName] = rest;
+  }
+
+  /**
+   * Sets the `info` block of the OpenAPI spec (title, version, description, and
+   * contact details).
+   *
+   * This metadata is displayed by documentation tools such as Swagger UI and
+   * Redoc, and is required by the OpenAPI 3.0 specification.
+   *
+   * @param {Prettify<InfoBlockInput>} params
+   * @param {string} params.title        - The public-facing name of the API.
+   * @param {string} params.version      - The API version string (e.g. `"1.0.0"`).
+   * @param {string} params.description  - A short description of what the API does.
+   * @param {string} [params.contactName]  - Name of the API owner / team.
+   * @param {string} [params.contactEmail] - Contact email address.
+   * @param {string} [params.contactUrl]   - URL to a contact page or team page.
+   *
+   * @example
+   * spec.setInfoBlock({
+   *   title: "User Management API",
+   *   version: "2.1.0",
+   *   description: "Handles user CRUD operations.",
+   *   contactName: "Platform Team",
+   *   contactEmail: "platform@example.com",
+   *   contactUrl: "https://example.com/team",
+   * });
+   */
+  public setInfoBlock({
+    title,
+    description,
+    version,
+    contactName,
+    contactEmail,
+    contactUrl,
+  }: Prettify<InfoBlockInput>): void {
+    this.info = {
+      title,
+      description,
+      version,
+      contact: {
+        name: contactName,
+        email: contactEmail,
+        url: contactUrl,
+      },
+    };
+  }
+
+  /**
+   * Adds a single route (path + HTTP method) to the spec, along with its request
+   * schema, response schema, security, and AWS Lambda integration.
+   *
+   * Throws if the same `routeName` + `method` combination is added more than once.
+   *
+   * @param {Prettify<AddRouteParams>} routeInfo - Configuration object for the route.
+   *
+   * @param {string} routeInfo.routeName
+   *   The URL path for this endpoint. Use `{paramName}` syntax for path parameters.
+   *   Example: `"/users/{id}"`
+   *
+   * @param {HttpMethod} routeInfo.method
+   *   The HTTP method: `"get"` | `"post"` | `"put"` | `"patch"` | `"delete"`.
+   *
+   * @param {string} routeInfo.summary
+   *   A short, human-readable description of what the endpoint does.
+   *   Shown as the endpoint title in Swagger UI / Redoc.
+   *
+   * @param {RequestInfo} routeInfo.requestInfo
+   *   Describes the incoming request shape.
+   *   - `contentSchema` — Zod schema, JSON Schema object, or schema name string
+   *     describing the request body. Omit for routes with no body (e.g. GET).
+   *   - `contentType` — MIME type of the request body (default: `"application/json"`).
+   *   - `requestParameters` — Array of path / query / header parameters.
+   *     Each entry: `{ name, type: "path"|"query"|"header", description, schema }`.
+   *   - `requestValidator` — Per-route override of the global validator:
+   *     `"none"` | `"strict"` | `"request-body-only"` | `"request-parameter-only"`.
+   *
+   * @param {ResponseInfo} routeInfo.responseInfo
+   *   Describes the successful response and any additional status codes.
+   *   - `happyPathStatusCode` — HTTP status code for the success case (e.g. `200`).
+   *   - `description` — Human-readable description of the success response.
+   *   - `contentType` — MIME type of the response body (e.g. `"application/json"`).
+   *   - `contentSchema` — Zod schema, JSON Schema object, or schema name string
+   *     describing the response body.
+   *   - `additionalStatusCodes` — Extra status codes to document (e.g. `[400, 404, 500]`).
+   *     Their descriptions are auto-generated from the HTTP standard phrase.
+   *
+   * @param {Record<string, ResponseObject>} [routeInfo.responses={}]
+   *   Optional initial responses map. Merged before `responseInfo` is applied.
+   *
+   * @param {Record<string, string[]>[]} [routeInfo.routeSecurity]
+   *   Per-route security requirements. Overrides the global security set via
+   *   `setGlobalSecurity()`. Pass an empty array `[]` to make a route public.
+   *   Example: `[{ myTokenAuthorizer: [] }]`
+   *
+   * @throws {Error} If the `method` already exists for `routeName`.
+   *
+   * @example
+   * // POST /users — create a new user
+   * spec.addRoute({
+   *   routeName: "/users",
+   *   method: "post",
+   *   summary: "Create a new user",
+   *   requestInfo: {
+   *     contentSchema: z.object({ email: z.string().email(), name: z.string() }),
+   *     contentType: "application/json",
+   *     requestValidator: "request-body-only",
+   *   },
+   *   responseInfo: {
+   *     happyPathStatusCode: 201,
+   *     description: "User created successfully",
+   *     contentType: "application/json",
+   *     contentSchema: "User",            // references a schema registered via addSchema()
+   *     additionalStatusCodes: [400, 409],
+   *   },
+   *   routeSecurity: [{ myTokenAuthorizer: [] }],
+   * });
+   *
+   * @example
+   * // GET /users/{id} — fetch a user by ID (no request body)
+   * spec.addRoute({
+   *   routeName: "/users/{id}",
+   *   method: "get",
+   *   summary: "Get a user by ID",
+   *   requestInfo: {
+   *     requestParameters: [
+   *       { name: "id", type: "path", description: "The user's UUID", schema: z.string().uuid() },
+   *     ],
+   *   },
+   *   responseInfo: {
+   *     happyPathStatusCode: 200,
+   *     description: "User found",
+   *     contentType: "application/json",
+   *     contentSchema: "User",
+   *     additionalStatusCodes: [404],
+   *   },
+   * });
+   */
+  public addRoute(routeInfo: Prettify<AddRouteParams>): void {
+    const {
+      routeName,
+      method,
+      summary,
+      requestInfo,
+      responseInfo,
+      responses = {},
+      routeSecurity,
+    } = routeInfo;
+
+    const {
+      requestValidator,
+      contentSchema,
+      contentType = "application/json",
+      requestParameters = [],
+    }: RequestInfo = requestInfo;
+
+    if (this.paths[routeName]?.[method]) {
+      throw new Error(`Method ${method} already exists for route ${routeName}`);
+    }
+
+    this.paths[routeName] = {
+      ...this.paths[routeName],
+      [method]: {
+        summary,
+        responses,
+      },
+    };
+
+    this.addRequestValidator(routeName, method, requestValidator);
+
+    this.addRequestBody({
+      routeName,
+      method,
+      requestBodySchema: contentSchema,
+      requestBodyContentType: contentType,
+    });
+
+    this.addResponseInfo({ routeName, method, responseInfo });
+
+    this.addRequestParameters(routeName, method, requestParameters);
+
+    this.addGatewayIntegration(routeName, method);
+
+    this.addRouteSecurity(routeName, method, routeSecurity);
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Private helpers
+  // ─────────────────────────────────────────────────────────────────────────────
 
   private addRequestValidator(
     routeName: string,
@@ -195,7 +586,6 @@ export class OpenApiSpec {
   }
 
   private addGatewayIntegration(routeName: string, method: HttpMethod) {
-
     const formatedRouteName = routeName.replace(/^\//, "").replace(/[{}]/g, "").replace(/\//g, "_");
 
     this.paths[routeName]![method as keyof PathItem] = {
@@ -220,109 +610,5 @@ export class OpenApiSpec {
       ...this.paths[routeName]![method as keyof PathItem]!,
       security,
     };
-  }
-
-  public addSecuritySchemeAuthorizer({
-    securityName,
-    authorizerType,
-    authorizerUri,
-    authorizerResultsCacheTtlInSeconds,
-  }: Prettify<AwsAuthorizerScheme>): void {
-    const authorizer: Authorizer = {
-      type: "apiKey",
-      name: "Authorization",
-      in: "header",
-      "x-amazon-apigateway-authtype": "custom",
-      "x-amazon-apigateway-authorizer": {
-        type: authorizerType,
-        authorizerUri: authorizerUri ?? `\${${securityName}_lambda_invoke_arn}`,
-        "x-amazon-apigateway-results-cache-ttl-in-seconds": authorizerResultsCacheTtlInSeconds ?? 0,
-      },
-    };
-
-    if (authorizerType === "token") {
-      authorizer["x-amazon-apigateway-authorizer"].identitySource =
-        "method.request.header.Authorization";
-    }
-
-    this.securitySchemes[securityName] = authorizer;
-  }
-
-  public setGlobalSecurity(security: Prettify<Security>[]) {
-    this.security = security;
-  }
-
-  public addSchema(schemaName: string, schema: z.ZodType | _JSONSchema): void {
-    const rest = this.getSchemaObject(schema);
-
-    this.schemas[schemaName] = rest;
-  }
-
-  public setInfoBlock({
-    title,
-    description,
-    version,
-    contactName,
-    contactEmail,
-    contactUrl,
-  }: Prettify<InfoBlockInput>): void {
-    this.info = {
-      title,
-      description,
-      version,
-      contact: {
-        name: contactName,
-        email: contactEmail,
-        url: contactUrl,
-      },
-    };
-  }
-
-  public addRoute(routeInfo: Prettify<AddRouteParams>): void {
-    const {
-      routeName,
-      method,
-      summary,
-      requestInfo,
-      responseInfo,
-      responses = {},
-      routeSecurity,
-    } = routeInfo;
-
-    const {
-      requestValidator,
-      contentSchema,
-      contentType = "application/json",
-      requestParameters = [],
-    }: RequestInfo = requestInfo;
-
-    if (this.paths[routeName]?.[method]) {
-      throw new Error(`Method ${method} already exists for route ${routeName}`);
-    }
-
-    this.paths[routeName] = {
-      ...this.paths[routeName],
-      [method]: {
-        summary,
-        responses,
-      },
-    };
-
-    this.addRequestValidator(routeName, method, requestValidator);
-
-    this.addRequestBody({
-      routeName,
-      method,
-      requestBodySchema: contentSchema,
-      requestBodyContentType: contentType,
-    });
-
-    this.addResponseInfo({ routeName, method, responseInfo });
-
-    this.addRequestParameters(routeName, method, requestParameters);
-
-    this.addGatewayIntegration(routeName, method);
-
-    this.addRouteSecurity(routeName, method, routeSecurity);
   }
 }
