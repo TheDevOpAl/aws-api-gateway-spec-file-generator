@@ -1,5 +1,5 @@
 import { _JSONSchema } from "zod/v4/core/json-schema.cjs";
-import { HttpMethod, HttpMethodUpperCase } from "./HttpMethod";
+import { HttpMethod } from "./HttpMethod";
 import { RouteRequestParameter } from "./RequestParameter";
 import { RequestValidationOptions } from "./RequestValidators";
 import { ZodJsonSchemaOmitted } from "./ZodJsonSchemaOmitted";
@@ -31,7 +31,7 @@ export type PathItem = {
     "x-amazon-apigateway-request-validator"?: RequestValidationOptions;
     security?: Record<string, string[]>[];
     "x-amazon-apigateway-integration": {
-      httpMethod: HttpMethodUpperCase;
+      httpMethod: "POST";
       payloadFormatVersion: "2.0";
       type: "aws_proxy";
       uri: string;

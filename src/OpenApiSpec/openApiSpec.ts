@@ -8,7 +8,7 @@ import { Authorizer, AwsAuthorizerScheme, SecurityScheme } from "../types/AwsAut
 import { ZodJsonSchemaOmitted } from "../types/ZodJsonSchemaOmitted";
 import { Schemas } from "../types/Schemas";
 import { InfoBlockInput, InfoBlockOutput } from "../types/InfoBlock";
-import { HttpMethod, HttpMethodUpperCase } from "../types/HttpMethod";
+import { HttpMethod } from "../types/HttpMethod";
 import { Server } from "../types/Server";
 import { _JSONSchema } from "zod/v4/core/json-schema.cjs";
 import { Security } from "../types/Security";
@@ -195,7 +195,6 @@ export class OpenApiSpec {
   }
 
   private addGatewayIntegration(routeName: string, method: HttpMethod) {
-    const methodUpper: HttpMethodUpperCase = method.toUpperCase() as HttpMethodUpperCase;
 
     const formatedRouteName = routeName.replace(/^\//, "").replace(/[{}]/g, "").replace(/\//g, "_");
 
@@ -203,7 +202,7 @@ export class OpenApiSpec {
       ...this.paths[routeName]![method as keyof PathItem]!,
       "x-amazon-apigateway-integration": {
         type: "aws_proxy",
-        httpMethod: methodUpper,
+        httpMethod: "POST",
         uri: `\${${formatedRouteName}_${method}_lambda_invoke_arn}`,
         payloadFormatVersion: "2.0",
       },
