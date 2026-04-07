@@ -18,7 +18,7 @@ describe("OpenApiSpec security", () => {
       securityName: "MyAuthorizer",
       authorizerType: "request",
       authorizerUri: "arn:aws:lambda:us-east-1:123456789012:function:my-authorizer",
-      authorizerResultsCacheTtlInSeconds: 300,
+      authorizerResultTtlInSeconds: 300,
     });
 
     const content = spec.getOpenApiSpecContent();
@@ -48,7 +48,7 @@ describe("OpenApiSpec security", () => {
             "x-amazon-apigateway-authorizer": {
               type: "request",
               authorizerUri: "arn:aws:lambda:us-east-1:123456789012:function:my-authorizer",
-              "x-amazon-apigateway-results-cache-ttl-in-seconds": 300,
+              authorizerResultTtlInSeconds: 300,
             },
           },
         },
@@ -81,7 +81,7 @@ describe("OpenApiSpec security", () => {
       securityName: "TokenAuthorizer",
       authorizerType: "token",
       authorizerUri: "arn:aws:lambda:us-east-1:123456789012:function:token-authorizer",
-      authorizerResultsCacheTtlInSeconds: 600,
+      authorizerResultTtlInSeconds: 600,
     });
 
     const content = spec.getOpenApiSpecContent();
@@ -111,7 +111,7 @@ describe("OpenApiSpec security", () => {
             "x-amazon-apigateway-authorizer": {
               type: "token",
               authorizerUri: "arn:aws:lambda:us-east-1:123456789012:function:token-authorizer",
-              "x-amazon-apigateway-results-cache-ttl-in-seconds": 600,
+              authorizerResultTtlInSeconds: 600,
               identitySource: "method.request.header.Authorization",
             },
           },
@@ -173,7 +173,7 @@ describe("OpenApiSpec security", () => {
             "x-amazon-apigateway-authorizer": {
               type: "request",
               authorizerUri: "${DefaultUriAuthorizer_lambda_invoke_arn}",
-              "x-amazon-apigateway-results-cache-ttl-in-seconds": 0,
+              authorizerResultTtlInSeconds: 0,
             },
           },
         },

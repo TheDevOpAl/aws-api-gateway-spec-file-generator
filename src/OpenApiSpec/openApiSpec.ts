@@ -205,7 +205,7 @@ export class OpenApiSpec {
     securityName,
     authorizerType,
     authorizerUri,
-    authorizerResultsCacheTtlInSeconds,
+    authorizerResultTtlInSeconds = 0,
   }: Prettify<AwsAuthorizerScheme>): void {
     const authorizer: Authorizer = {
       type: "apiKey",
@@ -215,7 +215,7 @@ export class OpenApiSpec {
       "x-amazon-apigateway-authorizer": {
         type: authorizerType,
         authorizerUri: authorizerUri ?? `\${${securityName}_lambda_invoke_arn}`,
-        "x-amazon-apigateway-results-cache-ttl-in-seconds": authorizerResultsCacheTtlInSeconds ?? 0,
+        authorizerResultTtlInSeconds,
       },
     };
 
