@@ -4,7 +4,7 @@ export type AwsAuthorizerScheme = {
   securityName: string;
   authorizerType: AuthorizerType;
   authorizerUri?: string;
-  authorizerResultsCacheTtlInSeconds?: number;
+  authorizerResultTtlInSeconds?: number;
 };
 
 export type SecurityScheme = {
@@ -20,6 +20,6 @@ export type Authorizer = {
     type: AuthorizerType;
     authorizerUri: string;
     identitySource?: string;
-    "x-amazon-apigateway-results-cache-ttl-in-seconds": number;
+    authorizerResultTtlInSeconds: number;
   };
 };
