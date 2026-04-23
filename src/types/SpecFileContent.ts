@@ -5,6 +5,7 @@ import { RequestValidationOptions, RequestValidators } from "./RequestValidators
 import { Schemas } from "./Schemas";
 import { Security } from "./Security";
 import { Server } from "./Server";
+import { ValidationErrorOptions } from "./ValidationErrorOptions";
 
 export type SpecFileContent = {
   openapi: string;
@@ -16,6 +17,7 @@ export type SpecFileContent = {
   };
   "x-amazon-apigateway-request-validators"?: RequestValidators;
   "x-amazon-apigateway-request-validator": RequestValidationOptions;
+  "x-amazon-apigateway-gateway-responses"?: Record<string, ValidationErrorOptions>;
   security: Security[];
   servers: Server[];
 };

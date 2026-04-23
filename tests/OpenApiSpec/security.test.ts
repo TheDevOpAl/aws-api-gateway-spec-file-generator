@@ -73,6 +73,32 @@ describe("OpenApiSpec security", () => {
       },
       "x-amazon-apigateway-request-validator": "none",
       security: [],
+      "x-amazon-apigateway-gateway-responses": {
+        BAD_REQUEST_BODY: {
+          statusCode: 400,
+          responseTemplates: {
+            "application/json": JSON.stringify({
+              message: "$context.error.validationErrorString",
+              error: "BAD_REQUEST_BODY",
+            }),
+          },
+          responseParameters: {
+            "gatewayresponse.header.Content-Type": "'application/json'",
+          },
+        },
+        BAD_REQUEST_PARAMETERS: {
+          statusCode: 400,
+          responseTemplates: {
+            "application/json": JSON.stringify({
+              message: "$context.error.validationErrorString",
+              error: "BAD_REQUEST_PARAMETERS",
+            }),
+          },
+          responseParameters: {
+            "gatewayresponse.header.Content-Type": "'application/json'",
+          },
+        },
+      },
     });
   });
 
@@ -137,6 +163,32 @@ describe("OpenApiSpec security", () => {
       },
       "x-amazon-apigateway-request-validator": "none",
       security: [],
+      "x-amazon-apigateway-gateway-responses": {
+        BAD_REQUEST_BODY: {
+          statusCode: 400,
+          responseTemplates: {
+            "application/json": JSON.stringify({
+              message: "$context.error.validationErrorString",
+              error: "BAD_REQUEST_BODY",
+            }),
+          },
+          responseParameters: {
+            "gatewayresponse.header.Content-Type": "'application/json'",
+          },
+        },
+        BAD_REQUEST_PARAMETERS: {
+          statusCode: 400,
+          responseTemplates: {
+            "application/json": JSON.stringify({
+              message: "$context.error.validationErrorString",
+              error: "BAD_REQUEST_PARAMETERS",
+            }),
+          },
+          responseParameters: {
+            "gatewayresponse.header.Content-Type": "'application/json'",
+          },
+        },
+      },
     });
   });
 
@@ -198,6 +250,32 @@ describe("OpenApiSpec security", () => {
       },
       "x-amazon-apigateway-request-validator": "none",
       security: [],
+      "x-amazon-apigateway-gateway-responses": {
+        BAD_REQUEST_BODY: {
+          statusCode: 400,
+          responseTemplates: {
+            "application/json": JSON.stringify({
+              message: "$context.error.validationErrorString",
+              error: "BAD_REQUEST_BODY",
+            }),
+          },
+          responseParameters: {
+            "gatewayresponse.header.Content-Type": "'application/json'",
+          },
+        },
+        BAD_REQUEST_PARAMETERS: {
+          statusCode: 400,
+          responseTemplates: {
+            "application/json": JSON.stringify({
+              message: "$context.error.validationErrorString",
+              error: "BAD_REQUEST_PARAMETERS",
+            }),
+          },
+          responseParameters: {
+            "gatewayresponse.header.Content-Type": "'application/json'",
+          },
+        },
+      },
     });
   });
 
