@@ -5,12 +5,14 @@ import { RequestValidationOptions, RequestValidators } from "./RequestValidators
 import { Schemas } from "./Schemas";
 import { Security } from "./Security";
 import { Server } from "./Server";
+import { Tag } from "./Tag";
 import { ValidationErrorOptions } from "./ValidationErrorOptions";
 
 export type SpecFileContent = {
   openapi: string;
   paths: Record<string, PathItem>;
   info: InfoBlockOutput;
+  tags: Tag[];
   components: {
     securitySchemes: SecurityScheme;
     schemas: Schemas;

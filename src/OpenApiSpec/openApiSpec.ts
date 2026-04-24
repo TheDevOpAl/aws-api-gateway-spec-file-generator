@@ -16,6 +16,7 @@ import { Prettify } from "../types/Prettify";
 import { RequestInfo } from "../types/RequestInfo";
 import { ResponseInfo } from "../types/ResponseInfo";
 import { getReasonPhrase } from "http-status-codes";
+import { Tag } from "../types/Tag";
 /**
  * Builds an OpenAPI 3.0.1 specification object for use with AWS API Gateway.
  *
@@ -81,6 +82,7 @@ export class OpenApiSpec {
   };
   private xAmazonApigatewayRequestValidator: RequestValidationOptions = "none";
   private servers: Server[] = [];
+  private tags: Tag[] = [];
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Public API
@@ -108,6 +110,7 @@ export class OpenApiSpec {
       openapi: this.openApi,
       paths: this.paths,
       info: this.info,
+      tags: this.tags,
       servers: this.servers,
       components: {
         securitySchemes: this.securitySchemes,
@@ -170,6 +173,26 @@ export class OpenApiSpec {
    */
   public setGlobalRequestValidator(requestValidator: RequestValidationOptions): void {
     this.xAmazonApigatewayRequestValidator = requestValidator;
+  }
+
+  /**
+   * Sets the top-level tags array for the OpenAPI spec.
+   *
+   * Tags are used to group related routes together in documentation tools
+   * such as Swagger UI and Redoc. Define them here, then reference them
+   * by name in individual routes via the `tags` field on `addRoute()`.
+   *
+   * @param {Tag[]} tags - An array of tag objects. Each tag must include a
+   *   `name` property and may optionally include a `description`.
+   *
+   * @example
+   * spec.setTags([
+   *   { name: "Users", description: "User management endpoints" },
+   *   { name: "Orders", description: "Order processing endpoints" },
+   * ]);
+   */
+  public setTags(tags: Tag[]): void {
+    this.tags = tags;
   }
 
   /**
