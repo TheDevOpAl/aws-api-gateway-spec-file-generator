@@ -10,7 +10,8 @@
     "test:coverage": "jest --coverage",
     "lint": "eslint \"src/**/*.ts\" --fix",
     "lint-ci": "eslint \"src/**/*.ts\"",
-    "prettier": "prettier --write ."
+    "prettier": "prettier --write .",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -26,6 +27,8 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^25.2.3",
     "eslint": "^9.39.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "neostandard": "^0.12.2",
     "prettier": "^3.8.1",
     "ts-jest": "^29.4.6",
@@ -40,5 +43,18 @@
   ],
   "bin": {
     "api-spec-generator": "./dist/index.js"
+  },
+  "lint-staged": {
+    "src/**/*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "tests/**/*.test.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   }
 }
