@@ -27,6 +27,7 @@ describe("OpenApiSpec security", () => {
       openapi: "3.0.1",
       paths: {},
       servers: [],
+      tags: [],
       info: {
         title: "",
         version: "",
@@ -163,6 +164,7 @@ describe("OpenApiSpec security", () => {
       },
       "x-amazon-apigateway-request-validator": "none",
       security: [],
+      tags: [],
       "x-amazon-apigateway-gateway-responses": {
         BAD_REQUEST_BODY: {
           statusCode: 400,
@@ -250,6 +252,7 @@ describe("OpenApiSpec security", () => {
       },
       "x-amazon-apigateway-request-validator": "none",
       security: [],
+      tags: [],
       "x-amazon-apigateway-gateway-responses": {
         BAD_REQUEST_BODY: {
           statusCode: 400,

@@ -7,7 +7,7 @@ A TypeScript utility for generating OpenAPI 3.0.1 specification files for use wi
 ## Installation
 
 ```bash
-npm install api-spec-generator zod
+npm install api-spec-generator
 ```
 
 **Peer dependencies:**
@@ -93,6 +93,24 @@ All configuration methods mutate the internal spec state. Call `getOpenApiSpecCo
 ---
 
 ### Public Methods
+
+#### `setTags(tags)`
+
+Sets the top-level tags array for the OpenAPI spec. Tags are used to group related routes together in documentation tools such as Swagger UI and Redoc. Define them here, then reference them by name in individual routes via the `tags` field on `addRoute()`.
+
+| Parameter | Type    | Required | Description                                                                     |
+| --------- | ------- | -------- | ------------------------------------------------------------------------------- |
+| `tags`    | `Tag[]` | Yes      | Array of tag objects. Each tag must include a `name` and optional `description` |
+
+```ts
+spec.setTags([
+  { name: "Users", description: "User management endpoints" },
+  { name: "Orders", description: "Order processing endpoints" },
+]);
+` ` `
+```
+
+---
 
 #### `setInfoBlock(params)`
 
