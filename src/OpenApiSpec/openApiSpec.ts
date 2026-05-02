@@ -10,7 +10,7 @@ import { Schemas } from "../types/Schemas";
 import { InfoBlockInput, InfoBlockOutput } from "../types/InfoBlock";
 import { HttpMethod } from "../types/HttpMethod";
 import { Server } from "../types/Server";
-import { _JSONSchema } from "zod/v4/core/json-schema.cjs";
+import { JSONSchema } from "zod/v4/core/json-schema.cjs";
 import { Security } from "../types/Security";
 import { Prettify } from "../types/Prettify";
 import { RequestInfo } from "../types/RequestInfo";
@@ -323,7 +323,7 @@ export class OpenApiSpec {
    *   },
    * });
    */
-  public addSchema(schemaName: string, schema: z.ZodType | _JSONSchema): void {
+  public addSchema(schemaName: string, schema: z.ZodType | JSONSchema): void {
     const rest = this.getSchemaObject(schema);
     this.schemas[schemaName] = rest;
   }
@@ -529,8 +529,8 @@ export class OpenApiSpec {
   }
 
   private getSchemaObject(
-    requestBodySchema: z.ZodType | string | _JSONSchema,
-  ): ZodJsonSchemaOmitted | { $ref: string } | _JSONSchema {
+    requestBodySchema: z.ZodType | string | JSONSchema,
+  ): ZodJsonSchemaOmitted | { $ref: string } | JSONSchema {
     if (requestBodySchema instanceof z.ZodType) {
       const { $schema, ...rest } = z.toJSONSchema(requestBodySchema);
       return rest;
@@ -594,7 +594,7 @@ export class OpenApiSpec {
   }: {
     routeName: string;
     method: HttpMethod;
-    requestBodySchema?: z.ZodObject | string | _JSONSchema;
+    requestBodySchema?: z.ZodObject | string | JSONSchema;
     requestBodyContentType: string;
   }): void {
     if (requestBodySchema) {
