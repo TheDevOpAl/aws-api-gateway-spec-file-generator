@@ -1,4 +1,5 @@
 import { SecurityScheme } from "./AwsAuthorizerSheme";
+import { CORS } from "./CORS";
 import { InfoBlockOutput } from "./InfoBlock";
 import { PathItem } from "./PathItem";
 import { RequestValidationOptions, RequestValidators } from "./RequestValidators";
@@ -22,4 +23,5 @@ export type SpecFileContent = {
   "x-amazon-apigateway-gateway-responses"?: Record<string, ValidationErrorOptions>;
   security: Security[];
   servers: Server[];
+  "x-amazon-apigateway-cors"?: CORS;
 };

@@ -17,6 +17,7 @@ import { RequestInfo } from "../types/RequestInfo";
 import { ResponseInfo } from "../types/ResponseInfo";
 import { getReasonPhrase } from "http-status-codes";
 import { Tag } from "../types/Tag";
+import { CORS } from "../types/CORS";
 /**
  * Builds an OpenAPI 3.0.1 specification object for use with AWS API Gateway.
  *
@@ -81,6 +82,7 @@ export class OpenApiSpec {
     },
   };
   private xAmazonApigatewayRequestValidator: RequestValidationOptions = "none";
+  private CORS: CORS | null = null;
   private servers: Server[] = [];
   private tags: Tag[] = [];
 
@@ -147,7 +149,44 @@ export class OpenApiSpec {
       security: this.security,
     };
 
+    if (this.CORS) {
+      specContent["x-amazon-apigateway-cors"] = this.CORS;
+    }
+
     return specContent;
+  }
+
+  /**
+   * Sets the `x-amazon-apigateway-cors` extension on the OpenAPI spec, which configures
+   * cross-origin resource sharing (CORS) for an HTTP API in AWS API Gateway.
+   *
+   * This extension is applied at the root level of the OpenAPI structure. When present,
+   * API Gateway uses it to automatically handle preflight `OPTIONS` requests and attach
+   * the appropriate CORS headers to responses.
+   *
+   * @see {@link https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-swagger-extensions-cors-configuration.html | x-amazon-apigateway-cors object}
+   * @see {@link https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-cors.html | Configure CORS for HTTP APIs in API Gateway}
+   *
+   * @param cors - The CORS configuration object.
+   * @param cors.allowOrigins - The origins permitted to make cross-origin requests, e.g. `["https://www.example.com"]`. Use `["*"]` to allow all origins.
+   * @param cors.allowMethods - The HTTP methods allowed in cross-origin requests, e.g. `["GET", "POST", "OPTIONS"]`.
+   * @param cors.allowHeaders - The request headers permitted in cross-origin requests, e.g. `["content-type", "x-amz-date"]`.
+   * @param cors.allowCredentials - Whether cookies or authorization headers are included in cross-origin requests. Cannot be `true` when `allowOrigins` contains `"*"`.
+   * @param cors.exposeHeaders - Response headers the browser is permitted to access from a cross-origin request, e.g. `["x-apigateway-header"]`.
+   * @param cors.maxAge - Number of seconds the browser should cache the preflight response. Reduces the number of preflight round-trips. e.g. `3600`.
+   *
+   * @example
+   * spec.setCORS({
+   *   allowOrigins: ["https://www.example.com"],
+   *   allowMethods: ["GET", "POST", "OPTIONS"],
+   *   allowHeaders: ["content-type", "x-amz-date", "x-apigateway-header"],
+   *   allowCredentials: true,
+   *   exposeHeaders: ["x-apigateway-header", "x-amz-date", "content-type"],
+   *   maxAge: 3600,
+   * });
+   */
+  public setCORS(cors: Prettify<CORS>): void {
+    this.CORS = cors;
   }
 
   /**
