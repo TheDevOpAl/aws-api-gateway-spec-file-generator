@@ -38,7 +38,7 @@ jobs:
 
       - name: Compute next tag from git tags
         id: bump
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const { execSync } = require('child_process');
@@ -133,7 +133,7 @@ jobs:
           fetch-depth: 0
 
       - name: Get latest tag
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         id: get-tag
         with:
           script: |
@@ -168,7 +168,7 @@ jobs:
         run: npm run build
 
       - name: Add version to package.json
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const fs = require('fs');
