@@ -41,7 +41,17 @@ spec.setServers([
 // 3. Set global request validation
 spec.setGlobalRequestValidator("strict");
 
-// 4. Register a Lambda authorizer
+// 4. Configure CORS, if needed
+spec.setCORS({
+  allowOrigins: ["https://www.example.com"],
+  allowMethods: ["GET", "POST", "OPTIONS"],
+  allowHeaders: ["content-type", "x-amz-date"],
+  allowCredentials: true,
+  exposeHeaders: ["x-apigateway-header"],
+  maxAge: 3600,
+});
+
+// 5. Register a Lambda authorizer
 spec.addSecuritySchemeAuthorizer({
   securityName: "myTokenAuthorizer",
   authorizerType: "token",
@@ -49,14 +59,14 @@ spec.addSecuritySchemeAuthorizer({
   authorizerResultsCacheTtlInSeconds: 300,
 });
 
-// 5. Apply security globally
+// 6. Apply security globally
 spec.setGlobalSecurity([{ myTokenAuthorizer: [] }]);
 
-// 6. Register a reusable schema
+// 7. Register a reusable schema
 const UserSchema = z.object({ id: z.string().uuid(), email: z.string().email() });
 spec.addSchema("User", UserSchema);
 
-// 7. Add routes
+// 8. Add routes
 spec.addRoute({
   routeName: "/users",
   method: "post",
@@ -74,7 +84,7 @@ spec.addRoute({
   },
 });
 
-// 8. Export the spec
+// 9. Export the spec
 const content = spec.getOpenApiSpecContent();
 import fs from "fs";
 fs.writeFileSync("api-spec.json", JSON.stringify(content, null, 2));
@@ -107,7 +117,6 @@ spec.setTags([
   { name: "Users", description: "User management endpoints" },
   { name: "Orders", description: "Order processing endpoints" },
 ]);
-` ` `
 ```
 
 ---
@@ -167,6 +176,34 @@ Sets the default AWS request validator applied to all routes that do not specify
 
 ```ts
 spec.setGlobalRequestValidator("strict");
+```
+
+---
+
+#### `setCORS(cors)`
+
+Sets the `x-amazon-apigateway-cors` extension at the root level of the OpenAPI spec, which configures cross-origin resource sharing (CORS) for an HTTP API in AWS API Gateway. When present, API Gateway uses this configuration to automatically handle preflight `OPTIONS` requests and attach the appropriate CORS headers to responses.
+
+> **Note:** `allowCredentials` cannot be `true` when `allowOrigins` contains `"*"`.
+
+| Parameter          | Type       | Required | Description                                                                                                           |
+| ------------------ | ---------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
+| `allowOrigins`     | `string[]` | Yes      | Origins permitted to make cross-origin requests, e.g. `["https://www.example.com"]`. Use `["*"]` to allow all origins |
+| `allowMethods`     | `string[]` | Yes      | HTTP methods allowed in cross-origin requests, e.g. `["GET", "POST", "OPTIONS"]`                                      |
+| `allowHeaders`     | `string[]` | Yes      | Request headers permitted in cross-origin requests, e.g. `["content-type", "x-amz-date"]`                             |
+| `allowCredentials` | `boolean`  | No       | Whether cookies or authorization headers are included in cross-origin requests. Default: `false`                      |
+| `exposeHeaders`    | `string[]` | No       | Response headers the browser is permitted to access from a cross-origin request                                       |
+| `maxAge`           | `number`   | No       | Seconds the browser should cache the preflight response, reducing round-trips. e.g. `3600`                            |
+
+```ts
+spec.setCORS({
+  allowOrigins: ["https://www.example.com"],
+  allowMethods: ["GET", "POST", "OPTIONS"],
+  allowHeaders: ["content-type", "x-amz-date", "x-apigateway-header"],
+  allowCredentials: true,
+  exposeHeaders: ["x-apigateway-header", "x-amz-date", "content-type"],
+  maxAge: 3600,
+});
 ```
 
 ---
@@ -357,11 +394,12 @@ Follow this order when building a spec to avoid reference errors:
 1. `setInfoBlock()` — API metadata
 2. `setServers()` — base URLs
 3. `setGlobalRequestValidator()` — default validation mode
-4. `addSecuritySchemeAuthorizer()` — register authorizers
-5. `setGlobalSecurity()` — apply them globally
-6. `addSchema()` — register reusable schemas
-7. `addRoute()` — add endpoints (repeat as needed)
-8. `getOpenApiSpecContent()` — export the final spec
+4. `setCORS()` — cross-origin resource sharing _(optional)_
+5. `addSecuritySchemeAuthorizer()` — register authorizers
+6. `setGlobalSecurity()` — apply them globally
+7. `addSchema()` — register reusable schemas
+8. `addRoute()` — add endpoints (repeat as needed)
+9. `getOpenApiSpecContent()` — export the final spec
 
 ---
 
