@@ -149,6 +149,7 @@ spec.setInfoBlock({
   description: "Handles user CRUD operations.",
   contactName: "Platform Team",
   contactEmail: "platform@example.com",
+  contactUrl: "https://platform.example.com",
 });
 ```
 
