@@ -51,7 +51,15 @@ spec.setCORS({
   maxAge: 3600,
 });
 
-// 5. Register a Lambda authorizer
+// 5. Configure binary media types, if needed
+spec.setBinaryMediaTypes([
+  "application/octet-stream",
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+]);
+
+// 6. Register a Lambda authorizer
 spec.addSecuritySchemeAuthorizer({
   securityName: "myTokenAuthorizer",
   authorizerType: "token",
@@ -59,14 +67,14 @@ spec.addSecuritySchemeAuthorizer({
   authorizerResultsCacheTtlInSeconds: 300,
 });
 
-// 6. Apply security globally
+// 7. Apply security globally
 spec.setGlobalSecurity([{ myTokenAuthorizer: [] }]);
 
-// 7. Register a reusable schema
+// 8. Register a reusable schema
 const UserSchema = z.object({ id: z.string().uuid(), email: z.string().email() });
 spec.addSchema("User", UserSchema);
 
-// 8. Add routes
+// 9. Add routes
 spec.addRoute({
   routeName: "/users",
   method: "post",
@@ -84,7 +92,7 @@ spec.addRoute({
   },
 });
 
-// 9. Export the spec
+// 10. Export the spec
 const content = spec.getOpenApiSpecContent();
 import fs from "fs";
 fs.writeFileSync("api-spec.json", JSON.stringify(content, null, 2));
@@ -130,9 +138,9 @@ Sets the top-level `info` block of the spec — required by the OpenAPI 3.0 stan
 | `title`        | `string` | Yes      | Public-facing API name         |
 | `version`      | `string` | Yes      | Version string, e.g. `"1.0.0"` |
 | `description`  | `string` | Yes      | Short summary of the API       |
-| `contactName`  | `string` | No       | Owner or team name             |
-| `contactEmail` | `string` | No       | Contact email address          |
-| `contactUrl`   | `string` | No       | Link to a team or docs page    |
+| `contactName`  | `string` | Yes      | Owner or team name             |
+| `contactEmail` | `string` | Yes      | Contact email address          |
+| `contactUrl`   | `string` | Yes      | Link to a team or docs page    |
 
 ```ts
 spec.setInfoBlock({
@@ -191,9 +199,9 @@ Sets the `x-amazon-apigateway-cors` extension at the root level of the OpenAPI s
 | `allowOrigins`     | `string[]` | Yes      | Origins permitted to make cross-origin requests, e.g. `["https://www.example.com"]`. Use `["*"]` to allow all origins |
 | `allowMethods`     | `string[]` | Yes      | HTTP methods allowed in cross-origin requests, e.g. `["GET", "POST", "OPTIONS"]`                                      |
 | `allowHeaders`     | `string[]` | Yes      | Request headers permitted in cross-origin requests, e.g. `["content-type", "x-amz-date"]`                             |
-| `allowCredentials` | `boolean`  | No       | Whether cookies or authorization headers are included in cross-origin requests. Default: `false`                      |
-| `exposeHeaders`    | `string[]` | No       | Response headers the browser is permitted to access from a cross-origin request                                       |
-| `maxAge`           | `number`   | No       | Seconds the browser should cache the preflight response, reducing round-trips. e.g. `3600`                            |
+| `allowCredentials` | `boolean`  | Yes      | Whether cookies or authorization headers are included in cross-origin requests. Default: `false`                      |
+| `exposeHeaders`    | `string[]` | Yes      | Response headers the browser is permitted to access from a cross-origin request                                       |
+| `maxAge`           | `number`   | Yes      | Seconds the browser should cache the preflight response, reducing round-trips. e.g. `3600`                            |
 
 ```ts
 spec.setCORS({
@@ -205,6 +213,33 @@ spec.setCORS({
   maxAge: 3600,
 });
 ```
+
+---
+
+#### `setBinaryMediaTypes(binaryMediaTypes)`
+
+Sets the `x-amazon-apigateway-binary-media-types` extension at the root level of the OpenAPI spec. This tells API Gateway which MIME types should be treated as binary payloads, causing them to be base64-encoded when passing through the integration. Omitting this method means all content is treated as text.
+
+Common use cases include file uploads, image serving, PDF downloads, and any endpoint that sends or receives non-UTF-8 data.
+
+| Parameter          | Type       | Required | Description                                                                                                                |
+| ------------------ | ---------- | -------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `binaryMediaTypes` | `string[]` | Yes      | Array of MIME type strings API Gateway should handle as binary. Supports wildcards, e.g. `"image/*"` to match all subtypes |
+
+```ts
+// Common binary types
+spec.setBinaryMediaTypes([
+  "application/octet-stream",
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+]);
+
+// Wildcard to catch all image subtypes
+spec.setBinaryMediaTypes(["image/*", "application/octet-stream"]);
+```
+
+> **See also:** [`x-amazon-apigateway-binary-media-types` property](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-swagger-extensions-binary-media-types.html)
 
 ---
 
@@ -395,11 +430,12 @@ Follow this order when building a spec to avoid reference errors:
 2. `setServers()` — base URLs
 3. `setGlobalRequestValidator()` — default validation mode
 4. `setCORS()` — cross-origin resource sharing _(optional)_
-5. `addSecuritySchemeAuthorizer()` — register authorizers
-6. `setGlobalSecurity()` — apply them globally
-7. `addSchema()` — register reusable schemas
-8. `addRoute()` — add endpoints (repeat as needed)
-9. `getOpenApiSpecContent()` — export the final spec
+5. `setBinaryMediaTypes()` — binary payload handling _(optional)_
+6. `addSecuritySchemeAuthorizer()` — register authorizers
+7. `setGlobalSecurity()` — apply them globally
+8. `addSchema()` — register reusable schemas
+9. `addRoute()` — add endpoints (repeat as needed)
+10. `getOpenApiSpecContent()` — export the final spec
 
 ---
 

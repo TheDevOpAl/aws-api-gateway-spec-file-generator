@@ -85,6 +85,7 @@ export class OpenApiSpec {
   private CORS: CORS | null = null;
   private servers: Server[] = [];
   private tags: Tag[] = [];
+  private binaryMediaTypes: string[] = [];
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Public API
@@ -153,7 +154,43 @@ export class OpenApiSpec {
       specContent["x-amazon-apigateway-cors"] = this.CORS;
     }
 
+    if (this.binaryMediaTypes.length) {
+      specContent["x-amazon-apigateway-binary-media-types"] = this.binaryMediaTypes;
+    }
+
     return specContent;
+  }
+
+  /**
+   * Sets the `x-amazon-apigateway-binary-media-types` extension at the root level
+   * of the OpenAPI spec. This tells API Gateway which media types should be treated
+   * as binary payloads, causing them to be base64-encoded when passing through the
+   * integration. Omitting this extension means all content is treated as text.
+   *
+   * Common use cases include file uploads, image serving, PDF downloads, and any
+   * endpoint that sends or receives non-UTF-8 data.
+   *
+   * @see {@link https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-swagger-extensions-binary-media-types.html | x-amazon-apigateway-binary-media-types property}
+   *
+   * @param binaryMediaTypes - An array of MIME type strings that API Gateway should
+   * handle as binary. Supports wildcards, e.g. `"image/*"` to match all image types.
+   *
+   * @example
+   * // Common binary types
+   * spec.setBinaryMediaTypes([
+   *   "application/octet-stream",
+   *   "application/pdf",
+   *   "image/jpeg",
+   *   "image/png",
+   *   "image/webp",
+   * ]);
+   *
+   * @example
+   * // Wildcard to catch all image subtypes
+   * spec.setBinaryMediaTypes(["image/*", "application/octet-stream"]);
+   */
+  public setBinaryMediaTypes(binaryMediaTypes: string[]): void {
+    this.binaryMediaTypes = binaryMediaTypes;
   }
 
   /**

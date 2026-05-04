@@ -24,4 +24,5 @@ export type SpecFileContent = {
   security: Security[];
   servers: Server[];
   "x-amazon-apigateway-cors"?: CORS;
+  "x-amazon-apigateway-binary-media-types"?: string[];
 };
