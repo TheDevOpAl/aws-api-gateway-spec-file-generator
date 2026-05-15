@@ -15,9 +15,9 @@ import { Security } from "../types/Security";
 import { Prettify } from "../types/Prettify";
 import { RequestInfo } from "../types/RequestInfo";
 import { ResponseInfo } from "../types/ResponseInfo";
-import { getReasonPhrase } from "http-status-codes";
 import { Tag } from "../types/Tag";
 import { CORS } from "../types/CORS";
+import { HTTP_STATUS_REASONS } from "../types/HttpStatusCodes";
 /**
  * Builds an OpenAPI 3.0.1 specification object for use with AWS API Gateway.
  *
@@ -646,14 +646,14 @@ export class OpenApiSpec {
 
     additionalStatusCodes.forEach((statusCode) => {
       const description = {
-        description: getReasonPhrase(statusCode),
+        description: HTTP_STATUS_REASONS[statusCode],
       };
 
       responses[`${statusCode}`] = description;
     });
 
     responses["default"] = {
-      description: getReasonPhrase(happyPathStatusCode),
+      description: HTTP_STATUS_REASONS[happyPathStatusCode],
     };
 
     this.paths![routeName]![method as keyof PathItem] = {
