@@ -12,8 +12,7 @@ npm install api-spec-generator
 
 **Peer dependencies:**
 
-- [`zod`](https://github.com/colinhacks/zod) — for schema definitions. This also supplies the `_JSONSchema` type
-- [`http-status-codes`](https://www.npmjs.com/package/http-status-codes) — for auto-generated response descriptions
+- [`zod`](https://github.com/colinhacks/zod) — for schema definitions. This also supplies the `JSONSchema` type
 
 ---
 
@@ -27,11 +26,13 @@ const spec = new OpenApiSpec();
 
 // 1. Set API metadata
 spec.setInfoBlock({
-  title: "My API",
-  version: "1.0.0",
-  description: "Handles user management.",
-  contactEmail: "team@example.com",
-});
+  title: "This is my title",
+  description: "this is my description",
+  version: "This can be anything, but open api readers might be upset",
+  contactEmail: "fake-email@gmail.com",
+  contactName: "This can be a team name",
+  contactUrl: "https://www.what-am-i-doing.com/help-me-please"
+})
 
 // 2. Set base server URL(s)
 spec.setServers([
