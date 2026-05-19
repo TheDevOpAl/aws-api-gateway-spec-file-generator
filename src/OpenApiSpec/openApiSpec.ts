@@ -653,7 +653,7 @@ export class OpenApiSpec {
     });
 
     responses["default"] = {
-      description: HTTP_STATUS_REASONS[happyPathStatusCode],
+      description: "Unexpected Error",
     };
 
     this.paths![routeName]![method as keyof PathItem] = {
