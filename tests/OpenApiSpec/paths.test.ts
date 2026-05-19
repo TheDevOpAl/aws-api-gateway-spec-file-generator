@@ -53,7 +53,7 @@ describe("OpenApiSpec paths", () => {
               },
             },
             default: {
-              description: "OK",
+              description: "Unexpected Error",
             },
           },
           "x-amazon-apigateway-integration": {
@@ -121,7 +121,7 @@ describe("OpenApiSpec paths", () => {
               },
             },
             default: {
-              description: "OK",
+              description: "Unexpected Error",
             },
           },
           "x-amazon-apigateway-integration": {
@@ -152,7 +152,7 @@ describe("OpenApiSpec paths", () => {
               },
             },
             default: {
-              description: "OK",
+              description: "Unexpected Error",
             },
           },
           "x-amazon-apigateway-integration": {
@@ -220,7 +220,7 @@ describe("OpenApiSpec paths", () => {
               },
             },
             default: {
-              description: "OK",
+              description: "Unexpected Error",
             },
           },
           "x-amazon-apigateway-integration": {
@@ -253,7 +253,7 @@ describe("OpenApiSpec paths", () => {
               },
             },
             default: {
-              description: "OK",
+              description: "Unexpected Error",
             },
           },
           "x-amazon-apigateway-integration": {
@@ -368,7 +368,7 @@ describe("OpenApiSpec paths", () => {
               },
             },
             default: {
-              description: "OK",
+              description: "Unexpected Error",
             },
           },
           "x-amazon-apigateway-integration": {
@@ -399,7 +399,7 @@ describe("OpenApiSpec paths", () => {
               },
             },
             default: {
-              description: "OK",
+              description: "Unexpected Error",
             },
           },
           "x-amazon-apigateway-integration": {
@@ -432,7 +432,7 @@ describe("OpenApiSpec paths", () => {
               },
             },
             default: {
-              description: "OK",
+              description: "Unexpected Error",
             },
           },
           "x-amazon-apigateway-integration": {
@@ -488,7 +488,7 @@ describe("OpenApiSpec paths", () => {
               },
             },
             default: {
-              description: "OK",
+              description: "Unexpected Error",
             },
           },
           "x-amazon-apigateway-request-validator": "strict",
@@ -550,7 +550,7 @@ describe("OpenApiSpec paths", () => {
               },
             },
             default: {
-              description: "OK",
+              description: "Unexpected Error",
             },
           },
           "x-amazon-apigateway-request-validator": "strict",
@@ -628,7 +628,7 @@ describe("OpenApiSpec paths", () => {
               },
             },
             default: {
-              description: "OK",
+              description: "Unexpected Error",
             },
           },
           "x-amazon-apigateway-request-validator": "strict",
@@ -702,7 +702,7 @@ describe("OpenApiSpec paths", () => {
               },
             },
             default: {
-              description: "OK",
+              description: "Unexpected Error",
             },
           },
           parameters: [
@@ -771,7 +771,7 @@ describe("OpenApiSpec paths", () => {
               },
             },
             default: {
-              description: "OK",
+              description: "Unexpected Error",
             },
           },
           "x-amazon-apigateway-integration": {
@@ -846,7 +846,7 @@ describe("OpenApiSpec paths", () => {
               description: "Forbidden",
             },
             default: {
-              description: "OK",
+              description: "Unexpected Error",
             },
           },
           "x-amazon-apigateway-integration": {
