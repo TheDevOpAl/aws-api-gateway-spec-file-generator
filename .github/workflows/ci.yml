@@ -115,34 +115,23 @@ jobs:
           git tag -a "$TAG" -m "$TAG"
           git push origin "$TAG"
 
-  update-package-version:
-    name: Update package.json version
-    needs: bump-version
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Create GitHub release
+        uses: actions/github-script@v7
         with:
-          ref: ${{ github.ref }}
-
-      - name: Update package.json version
-        run: |
-          VERSION="${{ needs.bump-version.outputs.version }}"
-          npm version "$VERSION" --no-git-tag-version
-
-      - name: Commit updated package.json
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package.json package-lock.json
-          git commit -m "chore: set version to ${{ needs.bump-version.outputs.version }} [skip ci]"
-          git push origin HEAD:main
+          script: |
+            await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: `v${{ steps.bump.outputs.version }}`,
+              name: `v${{ steps.bump.outputs.version }}`,
+              generate_release_notes: true,
+              draft: false,
+              prerelease: `v${{ steps.bump.outputs.version }}`.includes('-'),
+            });
 
   publish:
     name: Publish to npm
-    needs: [bump-version, update-package-version]
+    needs: bump-version
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -158,6 +147,21 @@ jobs:
         with:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
+
+      - name: Update package.json version
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { readFileSync, writeFileSync } = require('fs');
+            const path = require('path');
+
+            const packageJsonPath = path.join(process.cwd(), 'package.json');
+            const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+
+            packageJson.version = '${{ needs.bump-version.outputs.version }}';
+
+            writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
+            console.log('Updated package.json version to:', packageJson.version);
 
       - name: Install dependencies
         run: npm ci
