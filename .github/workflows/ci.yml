@@ -164,9 +164,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
-        run: npm run build
-
       - name: Add version to package.json
         uses: actions/github-script@v9
         with:
@@ -192,5 +189,18 @@ jobs:
 
             console.log('Updated package.json version to:', version);
 
+      - name: Build
+        run: npm run build
+
       - name: Publish to npm
-        run: npm publish --provenance
+        run: |
+          VERSION="${{ steps.get-tag.outputs.tag }}"
+          # Strip leading 'v'
+          VERSION="${VERSION#v}"
+          # If version contains a prerelease identifier (e.g. -alpha), publish to that tag
+          if [[ "$VERSION" == *"-"* ]]; then
+            PRERELEASE_TAG="${VERSION##*-}"
+            npm publish --provenance --tag "$PRERELEASE_TAG"
+          else
+            npm publish --provenance
+          fi

@@ -42,7 +42,7 @@
     "lib/**/*"
   ],
   "bin": {
-    "api-spec-generator": "./dist/index.js"
+    "api-spec-generator": "./lib/index.js"
   },
   "lint-staged": {
     "src/**/*.ts": [
