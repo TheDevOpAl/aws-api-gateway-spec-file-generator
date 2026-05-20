@@ -1,64 +1,87 @@
-# This is a basic workflow to help you get started with Actions
-
 name: CI
 
-# Controls when the workflow will run
 on:
   push:
     branches: ["main"]
-  release:
-    types: [published]
-  workflow_dispatch:
-    inputs:
-      bump:
-        description: "Type of version bump: major, minor, or patch"
-        required: true
-        default: "patch"
-      append_alpha:
-        description: "Append -alpha to the new version (true/false)"
-        required: false
-        default: "true"
 
 jobs:
   bump-version:
-    name: Bump version, tag and create release
+    name: Bump version and tag
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.bump.outputs.version }}
     permissions:
       contents: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - name: Get merged PR title
+        id: pr
+        uses: actions/github-script@v7
         with:
-          node-version: "22"
+          script: |
+            const commits = await github.rest.repos.listCommits({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              per_page: 1,
+            });
 
-      - name: Compute next tag from git tags
+            const commitMessage = commits.data[0].commit.message;
+            console.log('Commit message:', commitMessage);
+
+            // The merge commit message starts with "Merge pull request #N"
+            // and the PR title appears on the third line. For squash merges,
+            // the PR title is the commit message subject (first line).
+            const lines = commitMessage.split('\n').filter(l => l.trim());
+            let title;
+
+            if (lines[0].startsWith('Merge pull request')) {
+              title = lines[2]?.trim();
+            } else {
+              title = lines[0].trim();
+            }
+
+            if (!title) {
+              core.setFailed('Could not extract PR title from commit message');
+              return;
+            }
+
+            console.log('PR title:', title);
+            core.setOutput('title', title);
+
+      - name: Compute next semantic version
         id: bump
-        uses: actions/github-script@v9
+        uses: actions/github-script@v7
         with:
           script: |
             const { execSync } = require('child_process');
-            const fs = require('fs');
 
-            // Get environment variables with defaults
-            const bumpType = process.env.BUMP_TYPE || 'patch';
-            const appendAlpha = process.env.APPEND_ALPHA || 'true';
+            const title = '${{ steps.pr.outputs.title }}';
+            console.log('PR title:', title);
+
+            // Determine bump type from conventional commit prefix
+            let bumpType = 'patch';
+
+            if (/^[a-z]+(\(.+\))?!:/.test(title)) {
+              // Any type with ! is a breaking change
+              bumpType = 'major';
+            } else if (/^feat(\(.+\))?:/.test(title)) {
+              bumpType = 'minor';
+            } else if (/^(fix|feat|chore|docs|ci|refactor|perf|test|style|build)(\(.+\))?:/.test(title)) {
+              bumpType = 'patch';
+            } else {
+              core.setFailed(`PR title does not match conventional commit format: "${title}"`);
+              return;
+            }
 
             console.log('Bump type:', bumpType);
 
-            // Validate BUMP_TYPE
-            if (!['major', 'minor', 'patch'].includes(bumpType)) {
-              throw new Error(`Invalid bump type: ${bumpType}`);
-            }
-
-            // Fetch tags
+            // Get latest semver tag
             execSync('git fetch --tags');
-
-            // Get latest tag
             let latestTag = '';
             try {
               latestTag = execSync('git tag --list "v*" --sort=-v:refname | head -n1', { encoding: 'utf8' }).trim();
@@ -66,141 +89,83 @@ jobs:
               latestTag = '';
             }
 
-            if (!latestTag) {
-              latestTag = 'v0.0.0';
-            }
-
+            if (!latestTag) latestTag = 'v0.0.0';
             console.log('Latest tag:', latestTag);
 
-            // Parse version
-            let ver = latestTag.substring(1); // Remove 'v' prefix
-            const baseVer = ver.split('-')[0]; // Strip prerelease (e.g. -alpha)
-
+            // Parse and bump
+            const baseVer = latestTag.replace(/^v/, '').split('-')[0];
             let [maj, min, pat] = baseVer.split('.').map(x => parseInt(x) || 0);
 
-            // Bump version
             switch (bumpType) {
-              case 'major':
-                maj++; min = 0; pat = 0;
-                break;
-              case 'minor':
-                min++; pat = 0;
-                break;
-              case 'patch':
-                pat++;
-                break;
+              case 'major': maj++; min = 0; pat = 0; break;
+              case 'minor': min++; pat = 0; break;
+              case 'patch': pat++; break;
             }
 
-            const newBase = `${maj}.${min}.${pat}`;
-            const newVer = appendAlpha === 'true' ? `${newBase}-alpha` : newBase;
-
-            console.log('New version:', newVer);
-
-            // Set output for next steps
-            core.setOutput('version', newVer);
-        env:
-          BUMP_TYPE: ${{ github.event.inputs.bump }}
-          APPEND_ALPHA: ${{ github.event.inputs.append_alpha }}
+            const newVersion = `${maj}.${min}.${pat}`;
+            console.log('New version:', newVersion);
+            core.setOutput('version', newVersion);
 
       - name: Create and push tag
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          TAG=v${{ steps.bump.outputs.version }}
-          COMMIT_MSG=$(git log -1 --pretty=%B)
+          TAG="v${{ steps.bump.outputs.version }}"
           echo "Creating tag $TAG"
-          git tag -a "$TAG" -m "$COMMIT_MSG"
+          git tag -a "$TAG" -m "$TAG"
           git push origin "$TAG"
 
-      - name: Create GitHub release
-        uses: actions/create-release@v1
+  update-package-version:
+    name: Update package.json version
+    needs: bump-version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          tag_name: v${{ steps.bump.outputs.version }}
-          release_name: v${{ steps.bump.outputs.version }}
-          body: "Release ${{ steps.bump.outputs.version }} (automated)"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.ref }}
+
+      - name: Update package.json version
+        run: |
+          VERSION="${{ needs.bump-version.outputs.version }}"
+          npm version "$VERSION" --no-git-tag-version
+
+      - name: Commit updated package.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          git commit -m "chore: set version to ${{ needs.bump-version.outputs.version }} [skip ci]"
+          git push origin HEAD:main
 
   publish:
-    needs: bump-version
+    name: Publish to npm
+    needs: [bump-version, update-package-version]
     runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-
-      - name: Get latest tag
-        uses: actions/github-script@v9
-        id: get-tag
-        with:
-          script: |
-            const { execSync } = require('child_process');
-
-            // Get the latest tag
-            let latestTag = '';
-            try {
-              latestTag = execSync('git describe --tags $(git rev-list --tags --max-count=1)', { encoding: 'utf8' }).trim();
-            } catch (e) {
-              console.log('No tags found');
-              latestTag = '';
-            }
-
-            console.log('Latest tag:', latestTag);
-            core.setOutput('tag', latestTag);
-
-            if (!latestTag) {
-              core.setFailed('No tag found');
-            }
+          ref: main
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: "24"
+          registry-url: "https://registry.npmjs.org"
 
       - name: Install dependencies
         run: npm ci
-
-      - name: Add version to package.json
-        uses: actions/github-script@v9
-        with:
-          script: |
-            const fs = require('fs');
-            const path = require('path');
-
-            const tagName = '${{ steps.get-tag.outputs.tag }}';
-            console.log('Setting version from tag:', tagName);
-
-            // Remove 'v' prefix if present
-            const version = tagName.startsWith('v') ? tagName.slice(1) : tagName;
-
-            // Read package.json
-            const packageJsonPath = path.join(process.cwd(), 'package.json');
-            const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-
-            // Update version
-            packageJson.version = version;
-
-            // Write back
-            fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
-
-            console.log('Updated package.json version to:', version);
 
       - name: Build
         run: npm run build
 
       - name: Publish to npm
         run: |
-          VERSION="${{ steps.get-tag.outputs.tag }}"
-          # Strip leading 'v'
-          VERSION="${VERSION#v}"
-          # If version contains a prerelease identifier (e.g. -alpha), publish to that tag
-          if [[ "$VERSION" == *"-"* ]]; then
-            PRERELEASE_TAG="${VERSION##*-}"
-            npm publish --provenance --tag "$PRERELEASE_TAG"
-          else
-            npm publish --provenance
-          fi
+          VERSION="${{ needs.bump-version.outputs.version }}"
+          npm publish --provenance --access public
