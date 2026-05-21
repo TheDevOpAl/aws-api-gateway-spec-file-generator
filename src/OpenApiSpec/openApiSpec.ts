@@ -555,7 +555,6 @@ export class OpenApiSpec {
       ...this.paths[routeName],
       [method]: {
         summary,
-        responses: {},
       },
     };
 
