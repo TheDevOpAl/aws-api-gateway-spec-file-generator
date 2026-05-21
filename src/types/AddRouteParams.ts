@@ -9,6 +9,5 @@ export type AddRouteParams = {
   summary: string;
   requestInfo: RequestInfo;
   responseInfo: ResponseInfo;
-  responses?: {};
   routeSecurity?: Security[];
 };

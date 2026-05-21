@@ -31,8 +31,8 @@ spec.setInfoBlock({
   version: "This can be anything, but open api readers might be upset",
   contactEmail: "fake-email@gmail.com",
   contactName: "This can be a team name",
-  contactUrl: "https://www.what-am-i-doing.com/help-me-please"
-})
+  contactUrl: "https://www.what-am-i-doing.com/help-me-please",
+});
 
 // 2. Set base server URL(s)
 spec.setServers([
@@ -306,15 +306,14 @@ Adds an endpoint (path + HTTP method) to the spec. Registers the request/respons
 
 **Top-level fields:**
 
-| Parameter       | Type                             | Required | Description                                                             |
-| --------------- | -------------------------------- | -------- | ----------------------------------------------------------------------- |
-| `routeName`     | `string`                         | Yes      | URL path, e.g. `"/users/{id}"`. Use `{paramName}` for path params       |
-| `method`        | `HttpMethod`                     | Yes      | `"get"` \| `"post"` \| `"put"` \| `"patch"` \| `"delete"`               |
-| `summary`       | `string`                         | Yes      | Short, human-readable description of the endpoint                       |
-| `requestInfo`   | `RequestInfo`                    | Yes      | Describes the incoming request (see below)                              |
-| `responseInfo`  | `ResponseInfo`                   | Yes      | Describes the success response and error codes (see below)              |
-| `routeSecurity` | `Record<string, string[]>[]`     | No       | Per-route security override. Pass `[]` to make a route public           |
-| `responses`     | `Record<string, ResponseObject>` | No       | Optional initial responses map, merged before `responseInfo` is applied |
+| Parameter       | Type                         | Required | Description                                                       |
+| --------------- | ---------------------------- | -------- | ----------------------------------------------------------------- |
+| `routeName`     | `string`                     | Yes      | URL path, e.g. `"/users/{id}"`. Use `{paramName}` for path params |
+| `method`        | `HttpMethod`                 | Yes      | `"get"` \| `"post"` \| `"put"` \| `"patch"` \| `"delete"`         |
+| `summary`       | `string`                     | Yes      | Short, human-readable description of the endpoint                 |
+| `requestInfo`   | `RequestInfo`                | Yes      | Describes the incoming request (see below)                        |
+| `responseInfo`  | `ResponseInfo`               | Yes      | Describes the success response and error codes (see below)        |
+| `routeSecurity` | `Record<string, string[]>[]` | No       | Per-route security override. Pass `[]` to make a route public     |
 
 **`requestInfo` fields:**
 

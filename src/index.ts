@@ -1,5 +1,10 @@
 export { OpenApiSpec } from "./OpenApiSpec/openApiSpec";
-export { HttpMethod } from "./types/HttpMethod";
-export { PathItem } from "./types/PathItem";
+export { HttpStatusCodes } from "./types/HttpStatusCodes";
+export { CORS } from "./types/CORS";
+export { RequestValidationOptions } from "./types/RequestValidators";
+export { Tag } from "./types/Tag";
+export { Server } from "./types/Server";
+export { AwsAuthorizerScheme } from "./types/AwsAuthorizerSheme";
+export { Security } from "./types/Security";
+export { InfoBlockInput } from "./types/InfoBlock";
 export { AddRouteParams } from "./types/AddRouteParams";
-export { RequestParameterType } from "./types/RequestParameter";
