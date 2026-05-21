@@ -1,4 +1,4 @@
-import { _JSONSchema } from "zod/v4/core/json-schema.cjs";
+import { JSONSchema } from "zod/v4/core/json-schema.cjs";
 import { HttpMethod } from "./HttpMethod";
 import { RouteRequestParameter } from "./RequestParameter";
 import { RequestValidationOptions } from "./RequestValidators";
@@ -7,7 +7,7 @@ import { RefSchemaType } from "./RefSchemaType";
 
 type Content = {
   [key: string]: {
-    schema: ZodJsonSchemaOmitted | RefSchemaType | _JSONSchema;
+    schema: ZodJsonSchemaOmitted | RefSchemaType | JSONSchema;
   };
 };
 

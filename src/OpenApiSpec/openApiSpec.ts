@@ -382,7 +382,7 @@ export class OpenApiSpec {
    *
    * @param {string} schemaName - The name under which the schema is stored.
    *   Used as the `$ref` key: `#/components/schemas/<schemaName>`.
-   * @param {z.ZodType | _JSONSchema} schema - Either a Zod schema (automatically
+   * @param {z.ZodType | JSONSchema} schema - Either a Zod schema (automatically
    *   converted to JSON Schema) or a raw JSON Schema object.
    *
    * @example
@@ -488,8 +488,6 @@ export class OpenApiSpec {
    *   - `additionalStatusCodes` — Extra status codes to document (e.g. `[400, 404, 500]`).
    *     Their descriptions are auto-generated from the HTTP standard phrase.
    *
-   * @param {Record<string, ResponseObject>} [routeInfo.responses={}]
-   *   Optional initial responses map. Merged before `responseInfo` is applied.
    *
    * @param {Record<string, string[]>[]} [routeInfo.routeSecurity]
    *   Per-route security requirements. Overrides the global security set via
@@ -540,15 +538,7 @@ export class OpenApiSpec {
    * });
    */
   public addRoute(routeInfo: Prettify<AddRouteParams>): void {
-    const {
-      routeName,
-      method,
-      summary,
-      requestInfo,
-      responseInfo,
-      responses = {},
-      routeSecurity,
-    } = routeInfo;
+    const { routeName, method, summary, requestInfo, responseInfo, routeSecurity } = routeInfo;
 
     const {
       requestValidator,
@@ -565,7 +555,6 @@ export class OpenApiSpec {
       ...this.paths[routeName],
       [method]: {
         summary,
-        responses,
       },
     };
 
