@@ -310,7 +310,7 @@ export class OpenApiSpec {
    * @param {string}  [params.authorizerUri] - The full ARN of the authorizer
    *   Lambda's invoke URL. If omitted, defaults to the Terraform/CDK template
    *   variable `${securityName_lambda_invoke_arn}`.
-   * @param {number}  [params.authorizerResultsCacheTtlInSeconds=0] - How long
+   * @param {number}  [params.authorizerResultTtlInSeconds=0] - How long
    *   (in seconds) API Gateway caches a successful authorizer response. Set to
    *   `0` to disable caching. Max value is `3600` (1 hour).
    *
@@ -319,7 +319,7 @@ export class OpenApiSpec {
    *   securityName: "myTokenAuthorizer",
    *   authorizerType: "token",
    *   authorizerUri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:123456789012:function:MyAuthFunction/invocations",
-   *   authorizerResultsCacheTtlInSeconds: 300,
+   *   authorizerResultTtlInSeconds: 300,
    * });
    *
    * // Reference it globally:
