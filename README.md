@@ -65,7 +65,7 @@ spec.addSecuritySchemeAuthorizer({
   securityName: "myTokenAuthorizer",
   authorizerType: "token",
   authorizerUri: "arn:aws:apigateway:us-east-1:lambda:path/...",
-  authorizerResultsCacheTtlInSeconds: 300,
+  authorizerResultTtlInSeconds: 300,
 });
 
 // 7. Apply security globally
@@ -249,19 +249,19 @@ spec.setBinaryMediaTypes(["image/*", "application/octet-stream"]);
 
 Registers an AWS Lambda authorizer as a named security scheme under `components/securitySchemes`. Once registered, reference it by `securityName` in `setGlobalSecurity()` or per-route `routeSecurity`.
 
-| Parameter                            | Type                   | Required | Description                                                                                                      |
-| ------------------------------------ | ---------------------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
-| `securityName`                       | `string`               | Yes      | Reference name used in security requirements                                                                     |
-| `authorizerType`                     | `"token" \| "request"` | Yes      | `"token"` checks the `Authorization` header; `"request"` can inspect headers, query strings, and stage variables |
-| `authorizerUri`                      | `string`               | No       | Full Lambda invoke ARN. Defaults to the Terraform variable `${securityName_lambda_invoke_arn}`                   |
-| `authorizerResultsCacheTtlInSeconds` | `number`               | No       | Seconds to cache a successful auth response. Range: 0–3600. Default: `0`                                         |
+| Parameter                      | Type                   | Required | Description                                                                                                      |
+| ------------------------------ | ---------------------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
+| `securityName`                 | `string`               | Yes      | Reference name used in security requirements                                                                     |
+| `authorizerType`               | `"token" \| "request"` | Yes      | `"token"` checks the `Authorization` header; `"request"` can inspect headers, query strings, and stage variables |
+| `authorizerUri`                | `string`               | No       | Full Lambda invoke ARN. Defaults to the Terraform variable `${securityName_lambda_invoke_arn}`                   |
+| `authorizerResultTtlInSeconds` | `number`               | No       | Seconds to cache a successful auth response. Range: 0–3600. Default: `0`                                         |
 
 ```ts
 spec.addSecuritySchemeAuthorizer({
   securityName: "myTokenAuthorizer",
   authorizerType: "token",
   authorizerUri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:...",
-  authorizerResultsCacheTtlInSeconds: 300,
+  authorizerResultTtlInSeconds: 300,
 });
 ```
 

@@ -24,7 +24,6 @@ jobs:
         with:
           script: |
             const commitMessage = context.payload.head_commit.message;
-            console.log('Commit message:', commitMessage);
 
             // Squash merge: PR title is always the first line
             const title = commitMessage.split('\n')[0].trim().replace(/\s*\(#\d+\)\s*$/, '').trim();
@@ -34,7 +33,6 @@ jobs:
               return;
             }
 
-            console.log('PR title:', title);
             core.setOutput('title', title);
 
       - name: Compute next semantic version
@@ -45,7 +43,6 @@ jobs:
             const { execSync } = require('child_process');
 
             const title = '${{ steps.pr.outputs.title }}';
-            console.log('PR title:', title);
 
             // Determine bump type from conventional commit prefix
             let bumpType = 'patch';
@@ -62,8 +59,6 @@ jobs:
               return;
             }
 
-            console.log('Bump type:', bumpType);
-
             // Get latest semver tag
             execSync('git fetch --tags');
             let latestTag = '';
@@ -74,7 +69,6 @@ jobs:
             }
 
             if (!latestTag) latestTag = 'v0.0.0';
-            console.log('Latest tag:', latestTag);
 
             // Parse and bump
             const baseVer = latestTag.replace(/^v/, '').split('-')[0];
@@ -87,7 +81,6 @@ jobs:
             }
 
             const newVersion = `${maj}.${min}.${pat}`;
-            console.log('New version:', newVersion);
             core.setOutput('version', newVersion);
 
       - name: Create and push tag
@@ -145,7 +138,6 @@ jobs:
             packageJson.version = '${{ needs.bump-version.outputs.version }}';
 
             writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
-            console.log('Updated package.json version to:', packageJson.version);
 
       - name: Install dependencies
         run: npm ci
