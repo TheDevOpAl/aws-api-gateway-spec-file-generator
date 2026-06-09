@@ -730,8 +730,9 @@ export class OpenApiSpec {
       },
     };
 
-    if (additionalStatusCodes.length > 0)
+    if (additionalStatusCodes.length > 0) {
       console.warn("additionalStatusCodes is deprecated.  Please use additionalResponses instead.");
+    }
 
     const allAdditional: AdditionalResponses[] = [
       ...(additionalStatusCodes ?? []).map((code) => ({ statusCode: code })),
