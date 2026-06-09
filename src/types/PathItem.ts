@@ -17,8 +17,9 @@ type RequestBody = {
 };
 
 export type ResponseObject = {
-  description: string;
+  description?: string;
   content?: Content;
+  $ref?: string;
 };
 
 export type PathItem = {

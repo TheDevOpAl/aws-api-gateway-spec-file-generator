@@ -17,7 +17,7 @@ export type SpecFileContent = {
   components: {
     securitySchemes: SecurityScheme;
     schemas: Schemas;
-    responses: Record<string, ResponseObject>;
+    responses?: Record<string, ResponseObject>;
   };
   "x-amazon-apigateway-request-validators"?: RequestValidators;
   "x-amazon-apigateway-request-validator": RequestValidationOptions;

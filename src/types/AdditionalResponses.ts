@@ -7,4 +7,5 @@ export type AdditionalResponses = {
   description?: string;
   contentType?: string;
   contentSchema?: z.ZodObject | string | JSONSchema;
+  refType?: "schema" | "response";
 };
