@@ -208,8 +208,6 @@ describe("OpenApiSpec paths", () => {
     spec.addRoute(path2);
     const content = spec.getOpenApiSpecContent();
 
-    console.log(JSON.stringify(content.paths));
-
     expect(content.paths).toEqual({
       users: {
         get: {
