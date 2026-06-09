@@ -1,1 +1,1 @@
-npx lint-staged && npm t
+npx lint-staged

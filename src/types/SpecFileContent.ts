@@ -1,7 +1,7 @@
 import { SecurityScheme } from "./AwsAuthorizerSheme";
 import { CORS } from "./CORS";
 import { InfoBlockOutput } from "./InfoBlock";
-import { PathItem } from "./PathItem";
+import { PathItem, ResponseObject } from "./PathItem";
 import { RequestValidationOptions, RequestValidators } from "./RequestValidators";
 import { Schemas } from "./Schemas";
 import { Security } from "./Security";
@@ -17,6 +17,7 @@ export type SpecFileContent = {
   components: {
     securitySchemes: SecurityScheme;
     schemas: Schemas;
+    responses: Record<string, ResponseObject>;
   };
   "x-amazon-apigateway-request-validators"?: RequestValidators;
   "x-amazon-apigateway-request-validator": RequestValidationOptions;

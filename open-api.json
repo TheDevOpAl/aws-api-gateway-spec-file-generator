@@ -1,0 +1,94 @@
+{
+  "openapi": "3.0.1",
+  "paths": {
+    "gavinTest": {
+      "post": {
+        "summary": "This is a summary",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "hello": "world"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "203": {
+            "description": "Non Authoritative Information"
+          },
+          "default": {
+            "description": "Unexpected Error"
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "type": "aws_proxy",
+          "httpMethod": "POST",
+          "uri": "${gavinTest_post_lambda_invoke_arn}",
+          "payloadFormatVersion": "2.0"
+        }
+      }
+    }
+  },
+  "info": {
+    "title": "Hi Gavin",
+    "description": "Test Description",
+    "version": "1.0.0",
+    "contact": {
+      "name": "contactName",
+      "email": "contactEmail",
+      "url": "contactUrl"
+    }
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {},
+    "schemas": {},
+    "responses": {}
+  },
+  "x-amazon-apigateway-request-validators": {
+    "none": {
+      "validateRequestBody": false,
+      "validateRequestParameters": false
+    },
+    "strict": {
+      "validateRequestBody": true,
+      "validateRequestParameters": true
+    },
+    "request-body-only": {
+      "validateRequestBody": true,
+      "validateRequestParameters": false
+    },
+    "request-parameter-only": {
+      "validateRequestBody": false,
+      "validateRequestParameters": true
+    }
+  },
+  "x-amazon-apigateway-request-validator": "none",
+  "x-amazon-apigateway-gateway-responses": {
+    "BAD_REQUEST_BODY": {
+      "statusCode": 400,
+      "responseTemplates": {
+        "application/json": "{\"message\":\"$context.error.validationErrorString\",\"error\":\"BAD_REQUEST_BODY\"}"
+      },
+      "responseParameters": {
+        "gatewayresponse.header.Content-Type": "'application/json'"
+      }
+    },
+    "BAD_REQUEST_PARAMETERS": {
+      "statusCode": 400,
+      "responseTemplates": {
+        "application/json": "{\"message\":\"$context.error.validationErrorString\",\"error\":\"BAD_REQUEST_PARAMETERS\"}"
+      },
+      "responseParameters": {
+        "gatewayresponse.header.Content-Type": "'application/json'"
+      }
+    }
+  },
+  "security": []
+}

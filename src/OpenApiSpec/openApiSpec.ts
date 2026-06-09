@@ -86,6 +86,7 @@ export class OpenApiSpec {
   private servers: Server[] = [];
   private tags: Tag[] = [];
   private binaryMediaTypes: string[] = [];
+  private responses: Record<string, ResponseObject> = {};
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Public API
@@ -118,6 +119,7 @@ export class OpenApiSpec {
       components: {
         securitySchemes: this.securitySchemes,
         schemas: this.schemas,
+        responses: this.responses,
       },
       "x-amazon-apigateway-request-validators": this.xAmazonApigatewayRequestValidators,
       "x-amazon-apigateway-request-validator": this.xAmazonApigatewayRequestValidator,
@@ -404,6 +406,30 @@ export class OpenApiSpec {
     this.schemas[schemaName] = rest;
   }
 
+  public addResponsesSchema({
+    schemaName,
+    schema,
+    description,
+  }: {
+    schemaName: string;
+    schema?: z.ZodType | JSONSchema | string;
+    description?: string;
+  }): void {
+    const response: ResponseObject = {
+      description: description ?? schemaName,
+    };
+
+    if (schema) {
+      response.content = {
+        "application/json": {
+          schema: this.getSchemaObject(schema),
+        },
+      };
+    }
+
+    this.responses[schemaName] = response;
+  }
+
   /**
    * Sets the `info` block of the OpenAPI spec (title, version, description, and
    * contact details).
@@ -617,8 +643,13 @@ export class OpenApiSpec {
     method: HttpMethod;
     responseInfo: ResponseInfo;
   }): void {
-    const { contentSchema, contentType, happyPathStatusCode, description, additionalStatusCodes } =
-      responseInfo;
+    const {
+      contentSchema,
+      contentType,
+      happyPathStatusCode,
+      description,
+      additionalStatusCodes = [] /** additionalResponses = [] */,
+    } = responseInfo;
 
     const rest = this.getSchemaObject(contentSchema);
 
@@ -632,6 +663,14 @@ export class OpenApiSpec {
         },
       },
     };
+
+    if (additionalStatusCodes.length > 0)
+      console.warn("additionalStatusCodes is deprecated.  Please use additionalResponses instead.");
+
+    // const _allAdditional = [
+    //   ...(additionalStatusCodes ?? []).map(code => ({ statusCode: code })),
+    //   ...(additionalResponses ?? []),
+    // ];
 
     additionalStatusCodes.forEach((statusCode) => {
       const description = {
