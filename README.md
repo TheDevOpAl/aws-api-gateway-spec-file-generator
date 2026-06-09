@@ -292,17 +292,17 @@ spec.setGlobalSecurity([{ myTokenAuthorizer: [] }]);
 
 #### `addSchema(schemaName, schema)`
 
-Registers a reusable schema under `components/schemas`. Once registered, reference it anywhere a schema is accepted by passing its name as a string.
+Registers a reusable schema under `components/schemas`. Once registered, reference it anywhere a schema is accepted by passing its name as a string instead of the full schema object.
+
+| Parameter    | Type                      | Required | Description                                                              |
+| ------------ | ------------------------- | -------- | ------------------------------------------------------------------------ |
+| `schemaName` | `string`                  | Yes      | Storage key, e.g. `"User"`. Referenced as `#/components/schemas/User`    |
+| `schema`     | `z.ZodType \| JSONSchema` | Yes      | A Zod schema (auto-converted to JSON Schema) or a raw JSON Schema object |
 
 ```ts
-// Deprecated — two-argument form
+const UserSchema = z.object({ id: z.string().uuid(), email: z.string().email() });
 spec.addSchema("User", UserSchema);
 ```
-
-| Parameter | Type                      | Required | Description                                                              |
-| --------- | ------------------------- | -------- | ------------------------------------------------------------------------ |
-| `name`    | `string`                  | Yes      | Storage key, e.g. `"User"`. Referenced as `#/components/schemas/User`    |
-| `schema`  | `z.ZodType \| JSONSchema` | Yes      | A Zod schema (auto-converted to JSON Schema) or a raw JSON Schema object |
 
 ---
 
