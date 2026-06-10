@@ -75,7 +75,7 @@ spec.setGlobalSecurity([{ myTokenAuthorizer: [] }]);
 const UserSchema = z.object({ id: z.string().uuid(), email: z.string().email() });
 spec.addSchema("User", UserSchema);
 
-spec.addResponsesSchema({
+spec.addComponentResponse({
   schemaName: "Unauthorized",
   description: "Authentication required",
   schema: z.object({ message: z.string() }),
@@ -306,7 +306,7 @@ spec.addSchema("User", UserSchema);
 
 ---
 
-#### `addResponsesSchema(params)`
+#### `addComponentResponse(params)`
 
 Registers a reusable response under `components/responses`. Once registered, reference it in `additionalResponses` by passing its name as a string with `refType: "response"`. Only added to the spec output if at least one response is registered.
 
@@ -317,7 +317,7 @@ Registers a reusable response under `components/responses`. Once registered, ref
 | `description` | `string`                            | No       | Human-readable description. Defaults to `schemaName` if omitted                         |
 
 ```ts
-spec.addResponsesSchema({
+spec.addComponentResponse({
   schemaName: "Unauthorized",
   description: "Authentication required",
   schema: z.object({ message: z.string() }),
@@ -394,7 +394,7 @@ additionalResponses: [
   // 4. $ref to components/schemas (registered via addSchema)
   { statusCode: 400, contentSchema: "ErrorBody", refType: "schema" },
 
-  // 5. $ref to components/responses (registered via addResponsesSchema)
+  // 5. $ref to components/responses (registered via addComponentResponse)
   { statusCode: 401, contentSchema: "Unauthorized", refType: "response" },
 ];
 ```
@@ -456,7 +456,7 @@ spec.addRoute({
 
 Returns the fully assembled spec object. Call this **after** all routes, schemas, and metadata have been configured.
 
-**Returns:** `SpecFileContent` — the complete OpenAPI 3.0.1 object, including all paths, components, security definitions, and `x-amazon-apigateway-*` extensions. The `components.responses` key is only included if at least one response has been registered via `addResponsesSchema()`.
+**Returns:** `SpecFileContent` — the complete OpenAPI 3.0.1 object, including all paths, components, security definitions, and `x-amazon-apigateway-*` extensions. The `components.responses` key is only included if at least one response has been registered via `addComponentResponse()`.
 
 ```ts
 const content = spec.getOpenApiSpecContent();
@@ -467,7 +467,7 @@ fs.writeFileSync("api-spec.json", JSON.stringify(content, null, 2));
 
 ## Schema Input Options
 
-Anywhere a schema is accepted (`contentSchema`, `addSchema`, `addResponsesSchema`), you can pass one of three forms:
+Anywhere a schema is accepted (`contentSchema`, `addSchema`, `addComponentResponse`), you can pass one of three forms:
 
 | Form               | Example                                   | When to use                                     |
 | ------------------ | ----------------------------------------- | ----------------------------------------------- |
@@ -508,7 +508,7 @@ Follow this order when building a spec to avoid reference errors:
 6. `addSecuritySchemeAuthorizer()` — register authorizers
 7. `setGlobalSecurity()` — apply them globally
 8. `addSchema()` — register reusable schemas
-9. `addResponsesSchema()` — register reusable responses _(optional)_
+9. `addComponentResponse()` — register reusable responses _(optional)_
 10. `addRoute()` — add endpoints (repeat as needed)
 11. `getOpenApiSpecContent()` — export the final spec
 

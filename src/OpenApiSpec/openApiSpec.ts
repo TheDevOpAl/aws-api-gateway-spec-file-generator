@@ -734,8 +734,8 @@ export class OpenApiSpec {
     }
 
     const allAdditional: AdditionalResponses[] = [
-      ...(additionalStatusCodes ?? []).map((code) => ({ statusCode: code })),
-      ...(additionalResponses ?? []),
+      ...additionalStatusCodes.map((code) => ({ statusCode: code })),
+      ...additionalResponses,
     ];
 
     allAdditional.forEach(
