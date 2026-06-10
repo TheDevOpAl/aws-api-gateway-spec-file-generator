@@ -10,7 +10,6 @@ import { Schemas } from "../types/Schemas";
 import { InfoBlockInput, InfoBlockOutput } from "../types/InfoBlock";
 import { HttpMethod } from "../types/HttpMethod";
 import { Server } from "../types/Server";
-import { JSONSchema } from "zod/v4/core/json-schema.cjs";
 import { Security } from "../types/Security";
 import { Prettify } from "../types/Prettify";
 import { RequestInfo } from "../types/RequestInfo";
@@ -19,6 +18,8 @@ import { Tag } from "../types/Tag";
 import { CORS } from "../types/CORS";
 import { HTTP_STATUS_REASONS } from "../types/HttpStatusCodes";
 import { AdditionalResponses } from "../types/AdditionalResponses";
+import { ResponseSchemaInfo } from "../types/ResponseSchemaInfo";
+import { JSONSchema } from "zod/v4/core/json-schema.cjs";
 /**
  * Builds an OpenAPI 3.0.1 specification object for use with AWS API Gateway.
  *
@@ -467,18 +468,15 @@ export class OpenApiSpec {
     schemaName,
     schema,
     description,
-  }: {
-    schemaName: string;
-    schema?: z.ZodType | JSONSchema | string;
-    description?: string;
-  }): void {
+    mimeType = "application/json",
+  }: ResponseSchemaInfo): void {
     const response: ResponseObject = {
       description: description ?? schemaName,
     };
 
     if (schema) {
       response.content = {
-        "application/json": {
+        [mimeType]: {
           schema: this.getSchemaObject(schema),
         },
       };
