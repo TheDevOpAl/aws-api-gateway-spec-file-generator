@@ -1,10 +1,25 @@
 import { z } from "zod";
 import { AddRouteParams, OpenApiSpec } from "../../src/index";
+import { Logger } from "../../src/Logger/Logger";
+
+jest.mock("../../src/Logger/Logger", () => ({
+  Logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  },
+  ANSI_COLORS: {
+    RED: 31,
+    YELLOW: 33,
+    GREEN: 32,
+  },
+}));
 
 describe("OpenApiSpec paths", () => {
   let spec: OpenApiSpec;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     spec = new OpenApiSpec();
   });
 
@@ -75,7 +90,7 @@ describe("OpenApiSpec paths", () => {
         description: "hello",
         contentSchema: z.object({ username: z.string() }),
         contentType: "application/json",
-        additionalStatusCodes: [],
+        additionalStatusCodes: [201],
       },
     };
     const path2: AddRouteParams = {
@@ -94,6 +109,11 @@ describe("OpenApiSpec paths", () => {
     spec.addRoute(path1);
     spec.addRoute(path2);
     const content = spec.getOpenApiSpecContent();
+
+    expect(Logger.warn).toHaveBeenCalledWith(
+      "additionalStatusCodes is deprecated.  Please use additionalResponses instead.",
+    );
+    expect(Logger.warn).toHaveBeenCalledTimes(1);
 
     expect(content.paths).toEqual({
       users: {
@@ -116,6 +136,9 @@ describe("OpenApiSpec paths", () => {
                   },
                 },
               },
+            },
+            "201": {
+              description: "Created",
             },
           },
           "x-amazon-apigateway-integration": {
@@ -199,7 +222,6 @@ describe("OpenApiSpec paths", () => {
             description: "Unprocessable Entity",
             contentType: "application/json",
             contentSchema: "ErrorBody",
-            refType: "schema",
           },
         ],
       },
@@ -208,6 +230,10 @@ describe("OpenApiSpec paths", () => {
     spec.addRoute(path2);
     const content = spec.getOpenApiSpecContent();
 
+    expect(Logger.error).toHaveBeenCalledWith(
+      'Currently, string contentSchema values are only supported for additional responses with refType: "response" or "schema". Please update the additional response for status code 422 in products to include refType: "response" or "schema. Skipping schema for this response.',
+    );
+    expect(Logger.error).toHaveBeenCalledTimes(1);
     expect(content.paths).toEqual({
       users: {
         get: {
@@ -253,12 +279,7 @@ describe("OpenApiSpec paths", () => {
               },
             },
             "400": { description: "Bad Request" },
-            "422": {
-              description: "Unprocessable Entity",
-              content: {
-                "application/json": { schema: { $ref: "#/components/schemas/ErrorBody" } },
-              },
-            },
+
             "500": { $ref: "#/components/responses/InternalServerErrorResponse" },
           },
           "x-amazon-apigateway-integration": {

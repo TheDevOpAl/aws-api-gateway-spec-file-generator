@@ -20,6 +20,7 @@ import { HTTP_STATUS_REASONS } from "../types/HttpStatusCodes";
 import { AdditionalResponses } from "../types/AdditionalResponses";
 import { ResponseSchemaInfo } from "../types/ResponseSchemaInfo";
 import { JSONSchema } from "zod/v4/core/json-schema.cjs";
+import { Logger } from "../Logger/Logger";
 /**
  * Builds an OpenAPI 3.0.1 specification object for use with AWS API Gateway.
  *
@@ -44,7 +45,7 @@ import { JSONSchema } from "zod/v4/core/json-schema.cjs";
  *
  * spec.addSchema({ name: "User", schema: UserSchema });
  *
- * spec.addResponsesSchema({
+ * spec.addComponentResponse({
  *   schemaName: "Unauthorized",
  *   description: "Authentication required",
  *   schema: z.object({ message: z.string() }),
@@ -447,7 +448,7 @@ export class OpenApiSpec {
    *   Defaults to `schemaName` if omitted.
    *
    * @example
-   * spec.addResponsesSchema({
+   * spec.addComponentResponse({
    *   schemaName: "Unauthorized",
    *   description: "Authentication required",
    *   schema: z.object({ message: z.string() }),
@@ -464,7 +465,7 @@ export class OpenApiSpec {
    *   },
    * });
    */
-  public addResponsesSchema({
+  public addComponentResponse({
     schemaName,
     schema,
     description,
@@ -729,7 +730,7 @@ export class OpenApiSpec {
     };
 
     if (additionalStatusCodes.length > 0) {
-      console.warn("additionalStatusCodes is deprecated.  Please use additionalResponses instead.");
+      Logger.warn("additionalStatusCodes is deprecated.  Please use additionalResponses instead.");
     }
 
     const allAdditional: AdditionalResponses[] = [
@@ -737,26 +738,35 @@ export class OpenApiSpec {
       ...(additionalResponses ?? []),
     ];
 
-    allAdditional.forEach(({ statusCode, description, contentType, contentSchema, refType }) => {
-      const resolvedDescription = description ?? HTTP_STATUS_REASONS[statusCode];
+    allAdditional.forEach(
+      ({ statusCode, description, contentType = "application/json", contentSchema, refType }) => {
+        const resolvedDescription = description ?? HTTP_STATUS_REASONS[statusCode];
 
-      if (!contentSchema) {
-        responses[`${statusCode}`] = { description: resolvedDescription };
-        return;
-      }
+        if (!contentSchema) {
+          responses[`${statusCode}`] = { description: resolvedDescription };
+          return;
+        }
 
-      if (typeof contentSchema === "string" && refType === "response") {
-        responses[`${statusCode}`] = { $ref: `#/components/responses/${contentSchema}` };
-        return;
-      }
+        if (typeof contentSchema === "string" && refType === undefined) {
+          Logger.error(
+            `Currently, string contentSchema values are only supported for additional responses with refType: "response" or "schema". Please update the additional response for status code ${statusCode} in ${routeName} to include refType: "response" or "schema. Skipping schema for this response.`,
+          );
+          return;
+        }
 
-      responses[`${statusCode}`] = {
-        description: resolvedDescription,
-        content: {
-          [contentType ?? "application/json"]: { schema: this.getSchemaObject(contentSchema) },
-        },
-      };
-    });
+        if (typeof contentSchema === "string" && refType === "response") {
+          responses[`${statusCode}`] = { $ref: `#/components/responses/${contentSchema}` };
+          return;
+        }
+
+        responses[`${statusCode}`] = {
+          description: resolvedDescription,
+          content: {
+            [contentType]: { schema: this.getSchemaObject(contentSchema) },
+          },
+        };
+      },
+    );
 
     this.paths![routeName]![method as keyof PathItem] = {
       ...this.paths[routeName]![method as keyof PathItem]!,

@@ -7,6 +7,6 @@ export default {
     "^.+\\.ts?$": ["ts-jest", { useESM: true, tsconfig: "tsconfig.jest.json" }],
   },
   moduleFileExtensions: ["ts", "js", "json", "node"],
-  collectCoverageFrom: ["src/**/*.ts", "!src/**/*.d.ts", "!src/test.ts"],
+  collectCoverageFrom: ["src/**/*.ts", "!src/**/*.d.ts", "!src/test.ts", "!src/Logger/Logger.ts"],
   moduleDirectories: ["node_modules", "src"],
 };

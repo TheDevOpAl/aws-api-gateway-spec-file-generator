@@ -4,7 +4,7 @@ import { OpenApiSpec } from "../../src";
 describe("Add responses to OpenApiSpec", () => {
   it("should add responses to the OpenApiSpec content", () => {
     const spec = new OpenApiSpec();
-    spec.addResponsesSchema({
+    spec.addComponentResponse({
       schemaName: "NotFound",
       description: "Resource not found",
       schema: {
@@ -18,7 +18,7 @@ describe("Add responses to OpenApiSpec", () => {
       },
     });
 
-    spec.addResponsesSchema({
+    spec.addComponentResponse({
       schemaName: "Conflict",
       description: "Conflict occurred",
       schema: z.object({
@@ -26,7 +26,7 @@ describe("Add responses to OpenApiSpec", () => {
       }),
     });
 
-    spec.addResponsesSchema({
+    spec.addComponentResponse({
       schemaName: "Unauthorized",
       description: "Authentication required",
       schema: "ErrorBody",
