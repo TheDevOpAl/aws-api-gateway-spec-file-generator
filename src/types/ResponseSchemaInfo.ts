@@ -5,5 +5,5 @@ export type ResponseSchemaInfo = {
   schemaName: string;
   schema?: z.ZodType | JSONSchema | string;
   description?: string;
-  mimeType?: string;
+  mediaType?: string;
 };

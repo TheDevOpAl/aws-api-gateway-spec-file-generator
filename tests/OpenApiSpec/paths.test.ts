@@ -214,14 +214,7 @@ describe("OpenApiSpec paths", () => {
             statusCode: 500,
             description: "Internal Server Error",
             contentType: "application/json",
-            refType: "response",
             contentSchema: "InternalServerErrorResponse",
-          },
-          {
-            statusCode: 422,
-            description: "Unprocessable Entity",
-            contentType: "application/json",
-            contentSchema: "ErrorBody",
           },
         ],
       },
@@ -230,10 +223,6 @@ describe("OpenApiSpec paths", () => {
     spec.addRoute(path2);
     const content = spec.getOpenApiSpecContent();
 
-    expect(Logger.error).toHaveBeenCalledWith(
-      'Currently, string contentSchema values are only supported for additional responses with refType: "response" or "schema". Please update the additional response for status code 422 in products to include refType: "response" or "schema. Skipping schema for this response.',
-    );
-    expect(Logger.error).toHaveBeenCalledTimes(1);
     expect(content.paths).toEqual({
       users: {
         get: {

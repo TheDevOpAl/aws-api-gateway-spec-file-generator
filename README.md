@@ -366,13 +366,12 @@ Adds an endpoint (path + HTTP method) to the spec. Registers the request/respons
 
 **`AdditionalResponses` fields:**
 
-| Field           | Type                              | Required | Description                                                                                                                                      |
-| --------------- | --------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `statusCode`    | `HttpStatusCodes`                 | Yes      | The HTTP status code to document, e.g. `404`                                                                                                     |
-| `description`   | `string`                          | No       | Human-readable description. Defaults to the standard HTTP reason phrase                                                                          |
-| `contentType`   | `string`                          | No       | Response MIME type. Defaults to `"application/json"`                                                                                             |
-| `contentSchema` | `ZodType \| JSONSchema \| string` | No       | Response body schema. Omit for bodyless responses. When a string, behaviour depends on `refType`                                                 |
-| `refType`       | `"schema" \| "response"`          | No       | When `contentSchema` is a string: `"schema"` resolves to `#/components/schemas/{name}`, `"response"` resolves to `#/components/responses/{name}` |
+| Field           | Type                              | Required | Description                                                                                      |
+| --------------- | --------------------------------- | -------- | ------------------------------------------------------------------------------------------------ |
+| `statusCode`    | `HttpStatusCodes`                 | Yes      | The HTTP status code to document, e.g. `404`                                                     |
+| `description`   | `string`                          | No       | Human-readable description. Defaults to the standard HTTP reason phrase                          |
+| `contentType`   | `string`                          | No       | Response MIME type. Defaults to `"application/json"`                                             |
+| `contentSchema` | `ZodType \| JSONSchema \| string` | No       | Response body schema. Omit for bodyless responses. When a string, behaviour depends on `refType` |
 
 **`additionalResponses` scenarios:**
 
@@ -391,11 +390,8 @@ additionalResponses: [
   // 3. Inline raw JSON Schema
   { statusCode: 422, contentSchema: { type: "object", properties: { field: { type: "string" } } } },
 
-  // 4. $ref to components/schemas (registered via addSchema)
-  { statusCode: 400, contentSchema: "ErrorBody", refType: "schema" },
-
-  // 5. $ref to components/responses (registered via addComponentResponse)
-  { statusCode: 401, contentSchema: "Unauthorized", refType: "response" },
+  // 4. $ref to components/responses (registered via addComponentResponse)
+  { statusCode: 401, contentSchema: "Unauthorized" },
 ];
 ```
 

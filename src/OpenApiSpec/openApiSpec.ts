@@ -63,7 +63,7 @@ import { Logger } from "../Logger/Logger";
  *     contentSchema: "User",
  *     additionalResponses: [
  *       { statusCode: 404 },
- *       { statusCode: 401, contentSchema: "Unauthorized", refType: "response" },
+ *       { statusCode: 401, contentSchema: "Unauthorized" },
  *     ],
  *   },
  * });
@@ -433,7 +433,7 @@ export class OpenApiSpec {
    * Registers a reusable response in the `components/responses` section of the spec.
    *
    * Once registered, reference it by name in `additionalResponses` on any route by
-   * passing `contentSchema: "<schemaName>"` with `refType: "response"`. The response
+   * passing `contentSchema: "<schemaName>"`. The response
    * entry in the route will resolve to `$ref: #/components/responses/<schemaName>`.
    *
    * The `components/responses` block is only included in the final spec output if at
@@ -460,7 +460,7 @@ export class OpenApiSpec {
    *   responseInfo: {
    *     ...
    *     additionalResponses: [
-   *       { statusCode: 401, contentSchema: "Unauthorized", refType: "response" },
+   *       { statusCode: 401, contentSchema: "Unauthorized" },  // ← string reference to #/components/responses/Unauthorized
    *     ],
    *   },
    * });
@@ -469,7 +469,7 @@ export class OpenApiSpec {
     schemaName,
     schema,
     description,
-    mimeType = "application/json",
+    mediaType = "application/json",
   }: ResponseSchemaInfo): void {
     const response: ResponseObject = {
       description: description ?? schemaName,
@@ -477,7 +477,7 @@ export class OpenApiSpec {
 
     if (schema) {
       response.content = {
-        [mimeType]: {
+        [mediaType]: {
           schema: this.getSchemaObject(schema),
         },
       };
@@ -572,9 +572,6 @@ export class OpenApiSpec {
    *       - `description` — defaults to the standard HTTP reason phrase.
    *       - `contentType` — defaults to `"application/json"`.
    *       - `contentSchema` — inline Zod/JSON Schema, or a string name resolved
-   *         via `refType`.
-   *       - `refType: "schema"` — resolves string `contentSchema` to `#/components/schemas/{name}`.
-   *       - `refType: "response"` — resolves string `contentSchema` to `#/components/responses/{name}`.
    *   - `additionalStatusCodes` — **Deprecated.** Use `additionalResponses` instead.
    *     Logs a console warning when used.
    *
@@ -685,6 +682,7 @@ export class OpenApiSpec {
 
   private getSchemaObject(
     requestBodySchema: z.ZodType | string | JSONSchema,
+    componentLocation: "schemas" | "responses" = "schemas",
   ): ZodJsonSchemaOmitted | { $ref: string } | JSONSchema {
     if (requestBodySchema instanceof z.ZodType) {
       const { $schema, ...rest } = z.toJSONSchema(requestBodySchema);
@@ -692,7 +690,7 @@ export class OpenApiSpec {
     }
 
     if (typeof requestBodySchema === "string") {
-      return { $ref: `#/components/schemas/${requestBodySchema}` };
+      return { $ref: `#/components/${componentLocation}/${requestBodySchema}` };
     }
 
     return requestBodySchema;
@@ -739,7 +737,7 @@ export class OpenApiSpec {
     ];
 
     allAdditional.forEach(
-      ({ statusCode, description, contentType = "application/json", contentSchema, refType }) => {
+      ({ statusCode, description, contentType = "application/json", contentSchema }) => {
         const resolvedDescription = description ?? HTTP_STATUS_REASONS[statusCode];
 
         if (!contentSchema) {
@@ -747,15 +745,11 @@ export class OpenApiSpec {
           return;
         }
 
-        if (typeof contentSchema === "string" && refType === undefined) {
-          Logger.error(
-            `Currently, string contentSchema values are only supported for additional responses with refType: "response" or "schema". Please update the additional response for status code ${statusCode} in ${routeName} to include refType: "response" or "schema. Skipping schema for this response.`,
-          );
-          return;
-        }
-
-        if (typeof contentSchema === "string" && refType === "response") {
-          responses[`${statusCode}`] = { $ref: `#/components/responses/${contentSchema}` };
+        if (typeof contentSchema === "string") {
+          responses[`${statusCode}`] = this.getSchemaObject(
+            contentSchema,
+            "responses",
+          ) as ResponseObject;
           return;
         }
 
