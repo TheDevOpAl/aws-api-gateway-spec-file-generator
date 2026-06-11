@@ -1,10 +1,25 @@
 import { z } from "zod";
 import { AddRouteParams, OpenApiSpec } from "../../src/index";
+import { Logger } from "../../src/Logger/Logger";
+
+jest.mock("../../src/Logger/Logger", () => ({
+  Logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  },
+  ANSI_COLORS: {
+    RED: 31,
+    YELLOW: 33,
+    GREEN: 32,
+  },
+}));
 
 describe("OpenApiSpec paths", () => {
   let spec: OpenApiSpec;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     spec = new OpenApiSpec();
   });
 
@@ -52,9 +67,6 @@ describe("OpenApiSpec paths", () => {
                 },
               },
             },
-            default: {
-              description: "Unexpected Error",
-            },
           },
           "x-amazon-apigateway-integration": {
             type: "aws_proxy",
@@ -78,7 +90,7 @@ describe("OpenApiSpec paths", () => {
         description: "hello",
         contentSchema: z.object({ username: z.string() }),
         contentType: "application/json",
-        additionalStatusCodes: [],
+        additionalStatusCodes: [201],
       },
     };
     const path2: AddRouteParams = {
@@ -97,6 +109,11 @@ describe("OpenApiSpec paths", () => {
     spec.addRoute(path1);
     spec.addRoute(path2);
     const content = spec.getOpenApiSpecContent();
+
+    expect(Logger.warn).toHaveBeenCalledWith(
+      "additionalStatusCodes is deprecated.  Please use additionalResponses instead.",
+    );
+    expect(Logger.warn).toHaveBeenCalledTimes(1);
 
     expect(content.paths).toEqual({
       users: {
@@ -120,8 +137,8 @@ describe("OpenApiSpec paths", () => {
                 },
               },
             },
-            default: {
-              description: "Unexpected Error",
+            "201": {
+              description: "Created",
             },
           },
           "x-amazon-apigateway-integration": {
@@ -150,9 +167,6 @@ describe("OpenApiSpec paths", () => {
                   },
                 },
               },
-            },
-            default: {
-              description: "Unexpected Error",
             },
           },
           "x-amazon-apigateway-integration": {
@@ -190,7 +204,19 @@ describe("OpenApiSpec paths", () => {
         description: "hello",
         contentSchema: z.object({ username: z.string() }),
         contentType: "application/json",
-        additionalStatusCodes: [],
+        additionalResponses: [
+          {
+            statusCode: 400,
+            description: "Bad Request",
+            contentType: "application/json",
+          },
+          {
+            statusCode: 500,
+            description: "Internal Server Error",
+            contentType: "application/json",
+            contentSchema: "InternalServerErrorResponse",
+          },
+        ],
       },
     };
     spec.addRoute(path1);
@@ -208,19 +234,12 @@ describe("OpenApiSpec paths", () => {
                 "application/json": {
                   schema: {
                     type: "object",
-                    properties: {
-                      username: {
-                        type: "string",
-                      },
-                    },
+                    properties: { username: { type: "string" } },
                     required: ["username"],
                     additionalProperties: false,
                   },
                 },
               },
-            },
-            default: {
-              description: "Unexpected Error",
             },
           },
           "x-amazon-apigateway-integration": {
@@ -241,20 +260,16 @@ describe("OpenApiSpec paths", () => {
                 "application/json": {
                   schema: {
                     type: "object",
-                    properties: {
-                      username: {
-                        type: "string",
-                      },
-                    },
+                    properties: { username: { type: "string" } },
                     required: ["username"],
                     additionalProperties: false,
                   },
                 },
               },
             },
-            default: {
-              description: "Unexpected Error",
-            },
+            "400": { description: "Bad Request" },
+
+            "500": { $ref: "#/components/responses/InternalServerErrorResponse" },
           },
           "x-amazon-apigateway-integration": {
             type: "aws_proxy",
@@ -367,9 +382,6 @@ describe("OpenApiSpec paths", () => {
                 },
               },
             },
-            default: {
-              description: "Unexpected Error",
-            },
           },
           "x-amazon-apigateway-integration": {
             type: "aws_proxy",
@@ -397,9 +409,6 @@ describe("OpenApiSpec paths", () => {
                   },
                 },
               },
-            },
-            default: {
-              description: "Unexpected Error",
             },
           },
           "x-amazon-apigateway-integration": {
@@ -430,9 +439,6 @@ describe("OpenApiSpec paths", () => {
                   },
                 },
               },
-            },
-            default: {
-              description: "Unexpected Error",
             },
           },
           "x-amazon-apigateway-integration": {
@@ -486,9 +492,6 @@ describe("OpenApiSpec paths", () => {
                   },
                 },
               },
-            },
-            default: {
-              description: "Unexpected Error",
             },
           },
           "x-amazon-apigateway-request-validator": "strict",
@@ -548,9 +551,6 @@ describe("OpenApiSpec paths", () => {
                   },
                 },
               },
-            },
-            default: {
-              description: "Unexpected Error",
             },
           },
           "x-amazon-apigateway-request-validator": "strict",
@@ -627,9 +627,6 @@ describe("OpenApiSpec paths", () => {
                 },
               },
             },
-            default: {
-              description: "Unexpected Error",
-            },
           },
           "x-amazon-apigateway-request-validator": "strict",
           requestBody: {
@@ -701,9 +698,6 @@ describe("OpenApiSpec paths", () => {
                 },
               },
             },
-            default: {
-              description: "Unexpected Error",
-            },
           },
           parameters: [
             {
@@ -769,9 +763,6 @@ describe("OpenApiSpec paths", () => {
                   },
                 },
               },
-            },
-            default: {
-              description: "Unexpected Error",
             },
           },
           "x-amazon-apigateway-integration": {
@@ -844,9 +835,6 @@ describe("OpenApiSpec paths", () => {
             },
             "403": {
               description: "Forbidden",
-            },
-            default: {
-              description: "Unexpected Error",
             },
           },
           "x-amazon-apigateway-integration": {

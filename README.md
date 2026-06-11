@@ -71,9 +71,15 @@ spec.addSecuritySchemeAuthorizer({
 // 7. Apply security globally
 spec.setGlobalSecurity([{ myTokenAuthorizer: [] }]);
 
-// 8. Register a reusable schema
+// 8. Register reusable schemas and responses
 const UserSchema = z.object({ id: z.string().uuid(), email: z.string().email() });
 spec.addSchema("User", UserSchema);
+
+spec.addComponentResponse({
+  schemaName: "Unauthorized",
+  description: "Authentication required",
+  schema: z.object({ message: z.string() }),
+});
 
 // 9. Add routes
 spec.addRoute({
@@ -89,7 +95,10 @@ spec.addRoute({
     description: "User created successfully",
     contentType: "application/json",
     contentSchema: "User",
-    additionalStatusCodes: [400, 409],
+    additionalResponses: [
+      { statusCode: 400, contentSchema: "ErrorBody", refType: "schema" },
+      { statusCode: 401, contentSchema: "Unauthorized", refType: "response" },
+    ],
   },
 });
 
@@ -293,9 +302,29 @@ Registers a reusable schema under `components/schemas`. Once registered, referen
 ```ts
 const UserSchema = z.object({ id: z.string().uuid(), email: z.string().email() });
 spec.addSchema("User", UserSchema);
+```
 
-// Reference by name in a route:
-responseInfo: { contentSchema: "User", ... }
+---
+
+#### `addComponentResponse(params)`
+
+Registers a reusable response under `components/responses`. Once registered, reference it in `additionalResponses` by passing its name as a string with `refType: "response"`. Only added to the spec output if at least one response is registered.
+
+| Parameter     | Type                                | Required | Description                                                                             |
+| ------------- | ----------------------------------- | -------- | --------------------------------------------------------------------------------------- |
+| `schemaName`  | `string`                            | Yes      | Storage key, e.g. `"Unauthorized"`. Referenced as `#/components/responses/Unauthorized` |
+| `schema`      | `z.ZodType \| JSONSchema \| string` | No       | Response body schema. Omit for bodyless responses (e.g. `204 No Content`)               |
+| `description` | `string`                            | No       | Human-readable description. Defaults to `schemaName` if omitted                         |
+
+```ts
+spec.addComponentResponse({
+  schemaName: "Unauthorized",
+  description: "Authentication required",
+  schema: z.object({ message: z.string() }),
+});
+
+// Reference it in a route:
+additionalResponses: [{ statusCode: 401, contentSchema: "Unauthorized", refType: "response" }];
 ```
 
 ---
@@ -326,13 +355,45 @@ Adds an endpoint (path + HTTP method) to the spec. Registers the request/respons
 
 **`responseInfo` fields:**
 
-| Field                   | Type                              | Required | Description                                                                              |
-| ----------------------- | --------------------------------- | -------- | ---------------------------------------------------------------------------------------- |
-| `happyPathStatusCode`   | `number`                          | Yes      | HTTP status code for the success case, e.g. `200` or `201`                               |
-| `description`           | `string`                          | Yes      | Human-readable description of the success response                                       |
-| `contentType`           | `string`                          | Yes      | Response MIME type, e.g. `"application/json"`                                            |
-| `contentSchema`         | `ZodType \| JSONSchema \| string` | Yes      | Response body schema or a name reference to a registered schema                          |
-| `additionalStatusCodes` | `number[]`                        | Yes      | Extra status codes to document (e.g. `[400, 404, 500]`). Descriptions are auto-generated |
+| Field                   | Type                              | Required | Description                                                                                |
+| ----------------------- | --------------------------------- | -------- | ------------------------------------------------------------------------------------------ |
+| `happyPathStatusCode`   | `number`                          | Yes      | HTTP status code for the success case, e.g. `200` or `201`                                 |
+| `description`           | `string`                          | Yes      | Human-readable description of the success response                                         |
+| `contentType`           | `string`                          | Yes      | Response MIME type, e.g. `"application/json"`                                              |
+| `contentSchema`         | `ZodType \| JSONSchema \| string` | Yes      | Response body schema or a name reference to a registered schema                            |
+| `additionalResponses`   | `AdditionalResponses[]`           | No       | Extra responses to document. Replaces `additionalStatusCodes` (see below)                  |
+| `additionalStatusCodes` | `number[]`                        | No       | ⚠️ **Deprecated.** Use `additionalResponses` instead. Will log a console warning when used |
+
+**`AdditionalResponses` fields:**
+
+| Field           | Type                              | Required | Description                                                                                      |
+| --------------- | --------------------------------- | -------- | ------------------------------------------------------------------------------------------------ |
+| `statusCode`    | `HttpStatusCodes`                 | Yes      | The HTTP status code to document, e.g. `404`                                                     |
+| `description`   | `string`                          | No       | Human-readable description. Defaults to the standard HTTP reason phrase                          |
+| `contentType`   | `string`                          | No       | Response MIME type. Defaults to `"application/json"`                                             |
+| `contentSchema` | `ZodType \| JSONSchema \| string` | No       | Response body schema. Omit for bodyless responses. When a string, behaviour depends on `refType` |
+
+**`additionalResponses` scenarios:**
+
+```ts
+additionalResponses: [
+  // 1. No schema — description only (e.g. 404 Not Found)
+  { statusCode: 404 },
+
+  // 2. Inline Zod schema
+  {
+    statusCode: 409,
+    description: "Conflict",
+    contentSchema: z.object({ conflictingId: z.string() }),
+  },
+
+  // 3. Inline raw JSON Schema
+  { statusCode: 422, contentSchema: { type: "object", properties: { field: { type: "string" } } } },
+
+  // 4. $ref to components/responses (registered via addComponentResponse)
+  { statusCode: 401, contentSchema: "Unauthorized" },
+];
+```
 
 **Throws:** `Error` if `method` already exists for `routeName`.
 
@@ -352,7 +413,15 @@ spec.addRoute({
     description: "User created successfully",
     contentType: "application/json",
     contentSchema: "User",
-    additionalStatusCodes: [400, 409],
+    additionalResponses: [
+      { statusCode: 400, contentSchema: "ErrorBody", refType: "schema" },
+      { statusCode: 401, contentSchema: "Unauthorized", refType: "response" },
+      {
+        statusCode: 409,
+        description: "Conflict",
+        contentSchema: z.object({ conflictingId: z.string() }),
+      },
+    ],
   },
   routeSecurity: [{ myTokenAuthorizer: [] }],
 });
@@ -372,7 +441,7 @@ spec.addRoute({
     description: "User found",
     contentType: "application/json",
     contentSchema: "User",
-    additionalStatusCodes: [404],
+    additionalResponses: [{ statusCode: 404 }],
   },
 });
 ```
@@ -383,7 +452,7 @@ spec.addRoute({
 
 Returns the fully assembled spec object. Call this **after** all routes, schemas, and metadata have been configured.
 
-**Returns:** `SpecFileContent` — the complete OpenAPI 3.0.1 object, including all paths, components, security definitions, and `x-amazon-apigateway-*` extensions.
+**Returns:** `SpecFileContent` — the complete OpenAPI 3.0.1 object, including all paths, components, security definitions, and `x-amazon-apigateway-*` extensions. The `components.responses` key is only included if at least one response has been registered via `addComponentResponse()`.
 
 ```ts
 const content = spec.getOpenApiSpecContent();
@@ -394,7 +463,7 @@ fs.writeFileSync("api-spec.json", JSON.stringify(content, null, 2));
 
 ## Schema Input Options
 
-Anywhere a schema is accepted (`contentSchema`, `addSchema`), you can pass one of three forms:
+Anywhere a schema is accepted (`contentSchema`, `addSchema`, `addComponentResponse`), you can pass one of three forms:
 
 | Form               | Example                                   | When to use                                     |
 | ------------------ | ----------------------------------------- | ----------------------------------------------- |
@@ -435,8 +504,9 @@ Follow this order when building a spec to avoid reference errors:
 6. `addSecuritySchemeAuthorizer()` — register authorizers
 7. `setGlobalSecurity()` — apply them globally
 8. `addSchema()` — register reusable schemas
-9. `addRoute()` — add endpoints (repeat as needed)
-10. `getOpenApiSpecContent()` — export the final spec
+9. `addComponentResponse()` — register reusable responses _(optional)_
+10. `addRoute()` — add endpoints (repeat as needed)
+11. `getOpenApiSpecContent()` — export the final spec
 
 ---
 

@@ -57,6 +57,7 @@ export const HTTP_STATUS_REASONS = {
   505: "HTTP Version Not Supported",
   507: "Insufficient Storage",
   511: "Network Authentication Required",
+  default: "Unexpected Error",
 } as const;
 
 export type HttpStatusCodes = keyof typeof HTTP_STATUS_REASONS;

@@ -10,7 +10,6 @@ import { Schemas } from "../types/Schemas";
 import { InfoBlockInput, InfoBlockOutput } from "../types/InfoBlock";
 import { HttpMethod } from "../types/HttpMethod";
 import { Server } from "../types/Server";
-import { JSONSchema } from "zod/v4/core/json-schema.cjs";
 import { Security } from "../types/Security";
 import { Prettify } from "../types/Prettify";
 import { RequestInfo } from "../types/RequestInfo";
@@ -18,6 +17,10 @@ import { ResponseInfo } from "../types/ResponseInfo";
 import { Tag } from "../types/Tag";
 import { CORS } from "../types/CORS";
 import { HTTP_STATUS_REASONS } from "../types/HttpStatusCodes";
+import { AdditionalResponses } from "../types/AdditionalResponses";
+import { ResponseSchemaInfo } from "../types/ResponseSchemaInfo";
+import { JSONSchema } from "zod/v4/core/json-schema.cjs";
+import { Logger } from "../Logger/Logger";
 /**
  * Builds an OpenAPI 3.0.1 specification object for use with AWS API Gateway.
  *
@@ -40,12 +43,29 @@ import { HTTP_STATUS_REASONS } from "../types/HttpStatusCodes";
  * });
  * spec.setGlobalSecurity([{ myAuthorizer: [] }]);
  *
+ * spec.addSchema({ name: "User", schema: UserSchema });
+ *
+ * spec.addComponentResponse({
+ *   schemaName: "Unauthorized",
+ *   description: "Authentication required",
+ *   schema: z.object({ message: z.string() }),
+ * });
+ *
  * spec.addRoute({
  *   routeName: "/users/{id}",
  *   method: "get",
  *   summary: "Fetch a user by ID",
  *   requestInfo: { requestParameters: [{ name: "id", type: "path", description: "User ID", schema: z.string() }] },
- *   responseInfo: { happyPathStatusCode: 200, description: "Success", contentType: "application/json", contentSchema: UserSchema, additionalStatusCodes: [404] },
+ *   responseInfo: {
+ *     happyPathStatusCode: 200,
+ *     description: "Success",
+ *     contentType: "application/json",
+ *     contentSchema: "User",
+ *     additionalResponses: [
+ *       { statusCode: 404 },
+ *       { statusCode: 401, contentSchema: "Unauthorized" },
+ *     ],
+ *   },
  * });
  *
  * const content = spec.getOpenApiSpecContent();
@@ -86,6 +106,7 @@ export class OpenApiSpec {
   private servers: Server[] = [];
   private tags: Tag[] = [];
   private binaryMediaTypes: string[] = [];
+  private responses: Record<string, ResponseObject> = {};
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Public API
@@ -156,6 +177,10 @@ export class OpenApiSpec {
 
     if (this.binaryMediaTypes.length) {
       specContent["x-amazon-apigateway-binary-media-types"] = this.binaryMediaTypes;
+    }
+
+    if (Object.keys(this.responses).length) {
+      specContent.components.responses = this.responses;
     }
 
     return specContent;
@@ -405,6 +430,63 @@ export class OpenApiSpec {
   }
 
   /**
+   * Registers a reusable response in the `components/responses` section of the spec.
+   *
+   * Once registered, reference it by name in `additionalResponses` on any route by
+   * passing `contentSchema: "<schemaName>"`. The response
+   * entry in the route will resolve to `$ref: #/components/responses/<schemaName>`.
+   *
+   * The `components/responses` block is only included in the final spec output if at
+   * least one response has been registered via this method.
+   *
+   * @param {string} params.schemaName - The name under which the response is stored.
+   *   Used as the `$ref` key: `#/components/responses/<schemaName>`.
+   * @param {z.ZodType | JSONSchema | string} [params.schema] - The response body schema.
+   *   Accepts a Zod schema, raw JSON Schema object, or a string reference to a schema
+   *   registered via `addSchema()`. Omit for bodyless responses (e.g. `204 No Content`).
+   * @param {string} [params.description] - Human-readable description of the response.
+   *   Defaults to `schemaName` if omitted.
+   *
+   * @example
+   * spec.addComponentResponse({
+   *   schemaName: "Unauthorized",
+   *   description: "Authentication required",
+   *   schema: z.object({ message: z.string() }),
+   * });
+   *
+   * // Reference it in a route:
+   * spec.addRoute({
+   *   ...
+   *   responseInfo: {
+   *     ...
+   *     additionalResponses: [
+   *       { statusCode: 401, contentSchema: "Unauthorized" },  // ← string reference to #/components/responses/Unauthorized
+   *     ],
+   *   },
+   * });
+   */
+  public addComponentResponse({
+    schemaName,
+    schema,
+    description,
+    mediaType = "application/json",
+  }: ResponseSchemaInfo): void {
+    const response: ResponseObject = {
+      description: description ?? schemaName,
+    };
+
+    if (schema) {
+      response.content = {
+        [mediaType]: {
+          schema: this.getSchemaObject(schema),
+        },
+      };
+    }
+
+    this.responses[schemaName] = response;
+  }
+
+  /**
    * Sets the `info` block of the OpenAPI spec (title, version, description, and
    * contact details).
    *
@@ -478,15 +560,20 @@ export class OpenApiSpec {
    *   - `requestValidator` — Per-route override of the global validator:
    *     `"none"` | `"strict"` | `"request-body-only"` | `"request-parameter-only"`.
    *
-   * @param {ResponseInfo} routeInfo.responseInfo
+   *  @param {ResponseInfo} routeInfo.responseInfo
    *   Describes the successful response and any additional status codes.
    *   - `happyPathStatusCode` — HTTP status code for the success case (e.g. `200`).
    *   - `description` — Human-readable description of the success response.
    *   - `contentType` — MIME type of the response body (e.g. `"application/json"`).
    *   - `contentSchema` — Zod schema, JSON Schema object, or schema name string
    *     describing the response body.
-   *   - `additionalStatusCodes` — Extra status codes to document (e.g. `[400, 404, 500]`).
-   *     Their descriptions are auto-generated from the HTTP standard phrase.
+   *   - `additionalResponses` — Extra responses to document. Each entry accepts:
+   *       - `statusCode` — the HTTP status code (required).
+   *       - `description` — defaults to the standard HTTP reason phrase.
+   *       - `contentType` — defaults to `"application/json"`.
+   *       - `contentSchema` — inline Zod/JSON Schema, or a string name resolved
+   *   - `additionalStatusCodes` — **Deprecated.** Use `additionalResponses` instead.
+   *     Logs a console warning when used.
    *
    *
    * @param {Record<string, string[]>[]} [routeInfo.routeSecurity]
@@ -595,6 +682,7 @@ export class OpenApiSpec {
 
   private getSchemaObject(
     requestBodySchema: z.ZodType | string | JSONSchema,
+    componentLocation: "schemas" | "responses" = "schemas",
   ): ZodJsonSchemaOmitted | { $ref: string } | JSONSchema {
     if (requestBodySchema instanceof z.ZodType) {
       const { $schema, ...rest } = z.toJSONSchema(requestBodySchema);
@@ -602,7 +690,7 @@ export class OpenApiSpec {
     }
 
     if (typeof requestBodySchema === "string") {
-      return { $ref: `#/components/schemas/${requestBodySchema}` };
+      return { $ref: `#/components/${componentLocation}/${requestBodySchema}` };
     }
 
     return requestBodySchema;
@@ -617,8 +705,14 @@ export class OpenApiSpec {
     method: HttpMethod;
     responseInfo: ResponseInfo;
   }): void {
-    const { contentSchema, contentType, happyPathStatusCode, description, additionalStatusCodes } =
-      responseInfo;
+    const {
+      contentSchema,
+      contentType,
+      happyPathStatusCode,
+      description,
+      additionalStatusCodes = [],
+      additionalResponses = [],
+    } = responseInfo;
 
     const rest = this.getSchemaObject(contentSchema);
 
@@ -633,17 +727,40 @@ export class OpenApiSpec {
       },
     };
 
-    additionalStatusCodes.forEach((statusCode) => {
-      const description = {
-        description: HTTP_STATUS_REASONS[statusCode],
-      };
+    if (additionalStatusCodes.length > 0) {
+      Logger.warn("additionalStatusCodes is deprecated.  Please use additionalResponses instead.");
+    }
 
-      responses[`${statusCode}`] = description;
-    });
+    const allAdditional: AdditionalResponses[] = [
+      ...additionalStatusCodes.map((code) => ({ statusCode: code })),
+      ...additionalResponses,
+    ];
 
-    responses["default"] = {
-      description: "Unexpected Error",
-    };
+    allAdditional.forEach(
+      ({ statusCode, description, contentType = "application/json", contentSchema }) => {
+        const resolvedDescription = description ?? HTTP_STATUS_REASONS[statusCode];
+
+        if (!contentSchema) {
+          responses[`${statusCode}`] = { description: resolvedDescription };
+          return;
+        }
+
+        if (typeof contentSchema === "string") {
+          responses[`${statusCode}`] = this.getSchemaObject(
+            contentSchema,
+            "responses",
+          ) as ResponseObject;
+          return;
+        }
+
+        responses[`${statusCode}`] = {
+          description: resolvedDescription,
+          content: {
+            [contentType]: { schema: this.getSchemaObject(contentSchema) },
+          },
+        };
+      },
+    );
 
     this.paths![routeName]![method as keyof PathItem] = {
       ...this.paths[routeName]![method as keyof PathItem]!,
