@@ -8,3 +8,4 @@ export { AwsAuthorizerScheme } from "./types/AwsAuthorizerSheme";
 export { Security } from "./types/Security";
 export { InfoBlockInput } from "./types/InfoBlock";
 export { AddRouteParams } from "./types/AddRouteParams";
+export { getHttpStatusCodeName } from "./utils/getHttpStatusCodeName";

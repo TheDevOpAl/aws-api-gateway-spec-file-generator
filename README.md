@@ -96,8 +96,8 @@ spec.addRoute({
     contentType: "application/json",
     contentSchema: "User",
     additionalResponses: [
-      { statusCode: 400, contentSchema: "ErrorBody", refType: "schema" },
-      { statusCode: 401, contentSchema: "Unauthorized", refType: "response" },
+      { statusCode: 400, contentSchema: "ErrorBody" },
+      { statusCode: 401, contentSchema: "Unauthorized" },
     ],
   },
 });
@@ -324,7 +324,7 @@ spec.addComponentResponse({
 });
 
 // Reference it in a route:
-additionalResponses: [{ statusCode: 401, contentSchema: "Unauthorized", refType: "response" }];
+additionalResponses: [{ statusCode: 401, contentSchema: "Unauthorized" }];
 ```
 
 ---
@@ -414,8 +414,8 @@ spec.addRoute({
     contentType: "application/json",
     contentSchema: "User",
     additionalResponses: [
-      { statusCode: 400, contentSchema: "ErrorBody", refType: "schema" },
-      { statusCode: 401, contentSchema: "Unauthorized", refType: "response" },
+      { statusCode: 400, contentSchema: "ErrorBody" },
+      { statusCode: 401, contentSchema: "Unauthorized" },
       {
         statusCode: 409,
         description: "Conflict",
