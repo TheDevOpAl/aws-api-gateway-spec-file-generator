@@ -1,3 +1,4 @@
+import { HTTP_STATUS_REASONS } from "../types/HttpStatusCodes";
 import { z } from "zod";
 import { AddRouteParams } from "../types/AddRouteParams";
 import { PathItem, ResponseObject } from "../types/PathItem";
@@ -16,7 +17,6 @@ import { RequestInfo } from "../types/RequestInfo";
 import { ResponseInfo } from "../types/ResponseInfo";
 import { Tag } from "../types/Tag";
 import { CORS } from "../types/CORS";
-import { HTTP_STATUS_REASONS } from "../types/HttpStatusCodes";
 import { AdditionalResponses } from "../types/AdditionalResponses";
 import { ResponseSchemaInfo } from "../types/ResponseSchemaInfo";
 import { JSONSchema } from "zod/v4/core/json-schema.cjs";
